@@ -1,0 +1,89 @@
+Developer Case Study: Music Demo Submission Platform
+Welcome! We're excited to see what you can build. This case study is designed to simulate a real-world project and give you a chance to showcase your skills in creating a full-featured web application.
+The challenge is to build a platform that allows artists to submit their music demos to our label and for our A&R team to review them efficiently.
+Time Limit: Please spend no more than 5 hours on this project. We respect your time and are more interested in your approach and the quality of your work within this timeframe than in a perfectly polished, feature-complete application.
+Project Goal
+Build a robust demo submission platform for a music label. The application should serve two primary user types: artists, who can upload their tracks, and administrators, who can review and manage submissions through a dedicated dashboard.
+Core Features
+1. Artist Submission Portal
+This is the public-facing side where artists will submit their work.
+Multi-Track Uploader:
+Allow artists to upload multiple tracks (MP3, WAV, FLAC, M4A) in a single submission.
+Implement an asynchronous upload process so artists can fill out their information while files are uploading in the background.
+Include a progress tracker and estimated time to completion for the upload.
+Validate files for size and format, providing clear error messages.
+Artist Information Form:
+Collect essential artist details: name, email, and phone number.
+Include fields for social media links (e.g., Instagram, SoundCloud, Spotify) and a brief artist biography.
+Allow artists to add specific details for each track: title, genre, BPM, key, and a short description.
+Confirmation:
+After a successful submission, send an automated confirmation email to the artist.
+The email should be an HTML template sent from a custom domain (e.g., submissions@yourlabel.com).
+2. Admin Review Dashboard
+This is the secure, internal-facing side for our team.
+Secure Login:
+Implement a secure authentication system for administrators.
+Submission Management:
+Display all submissions in a clean, filterable, and searchable interface.
+Allow admins to stream audio directly without needing to download the full file. A waveform visualization would be a great touch.
+Manage submission statuses: Pending, In-Review, Approved, Rejected.
+Review & Grading System:
+Enable admins to grade submissions on a 1-10 scale.
+Provide fields for internal notes and constructive feedback for the artist.
+Email Template Editor:
+Create a simple visual editor within the dashboard for managing HTML email templates (e.g., confirmation, rejection, and approval emails).
+Allow the use of dynamic variables (like {{artist_name}}) in the templates.
+Technical Requirements
+Frontend
+Framework: React or Next.js.
+Styling: Your preferred modern styling solution.
+Design & Aesthetics: This is crucial. The platform must look beautiful and professional, fitting for a modern music label. We want a clean, premium, and visually engaging interface. Pay close attention to typography, spacing, and color palette to create a polished user experience that reflects our brand's commitment to quality.
+User Experience: Prioritize intuitive navigation, clear feedback (e.g., for form validation and upload progress), and a smooth user journey.
+Backend & Database
+API: Design a RESTful API with clear endpoints and consistent error handling.
+File Handling:
+Use a reliable file storage solution (e.g., AWS S3, Cloudinary).
+Implement background job processing for tasks like metadata extraction or audio compression.
+Database:
+Choose a database you are comfortable with.
+Design a schema that logically connects artists, submissions, tracks, and reviews.
+Real-Time Updates: Use WebSockets to provide real-time updates on the admin dashboard as new submissions come in.
+Email: Integrate with an email service like SendGrid or Mailgun.
+User Experience & Optics
+The entire user journey, from an artist landing on the page to an admin reviewing a track, should feel intuitive and seamless.
+The application must be fully responsive, providing an excellent experience on both mobile and desktop devices.
+Prioritize clear feedback for all user actions, such as form validation, upload progress, and status changes. The visual polish and smooth interactions are as important as the functionality.
+Deliverables
+Git Repository: A link to your complete codebase with a clear commit history. Your README.md should include:
+Setup and installation instructions.
+Documentation for environment variables.
+An overview of your database schema.
+Live Deployment: A URL to a working, deployed version of your application on a platform like Vercel or Railway. Please include admin credentials for testing.
+Written Documentation (500-1000 words): A brief document explaining:
+Your architectural decisions and technical choices.
+How you approached the file upload and email systems.
+Any trade-offs you made or known limitations.
+How you used AI coding assistants in your workflow, with specific examples if possible.
+Screen Recording (Optional but Recommended): A short screen recording (a link is fine) where you walk through your development process, demonstrate key features, and explain your problem-solving approach.
+Evaluation Criteria
+We'll be looking at your submission holistically, with an emphasis on the following:
+Technical Implementation (40%): The quality of your code, database design, API structure, and overall architecture.
+Feature Completeness (30%): How well the core features listed above are implemented and function.
+User Experience (20%): The usability, responsiveness, and design of the application for both artists and admins.
+Documentation & Process (10%): The clarity of your documentation and the thought process demonstrated in your work.
+
+
+When working with LLMs, please make sure to include the exact prompts you used for code generation in your commit messages, alongside the description of your changes.
+Getting Started
+To help you test, here is some sample data:
+Admin User:
+Email: admin@yourlabel.com
+Password: admin123
+Test Artists & Tracks:
+Artist: Alex Chen (alex.chen@email.com)
+Track 1: "Midnight Pulse", Electronic, 128 BPM, C minor
+Track 2: "Digital Dreams", Electronic, 140 BPM, F major
+Artist: Sarah Rodriguez (sarah.music@email.com)
+Track 1: "City Lights", Hip-Hop, 95 BPM, G minor
+If you have any questions, please don't hesitate to reach out.
+We're looking forward to seeing what you create. Good luck!
