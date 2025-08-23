@@ -42,9 +42,12 @@ import {
   Cancel,
   Info
 } from '@mui/icons-material';
-import axios from 'axios';
+import { useAuth } from '../../contexts/AuthContext';
+import { db } from '../../config/firebase';
+import { collection, query, where, orderBy, onSnapshot, doc, deleteDoc } from 'firebase/firestore';
 
 const SubmissionHistory = () => {
+  const { currentUser } = useAuth();
   const [submissions, setSubmissions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -66,24 +69,50 @@ const SubmissionHistory = () => {
     rejected: <Cancel />
   };
 
-  // Fetch submissions
-  const fetchSubmissions = async () => {
-    try {
-      setLoading(true);
-      const params = statusFilter !== 'all' ? { status: statusFilter } : {};
-      const response = await axios.get('/api/submissions/my-submissions', { params });
-      setSubmissions(response.data.submissions);
-      setError(null);
-    } catch (error) {
-      setError(error.response?.data?.error || 'Failed to fetch submissions');
-    } finally {
-      setLoading(false);
-    }
-  };
-
+  // Firebase real-time listener for submissions
   useEffect(() => {
-    fetchSubmissions();
-  }, [statusFilter]);
+    if (!currentUser) return;
+    
+    console.log('🔄 Setting up Firebase real-time listener for artist submissions');
+    
+    let q = collection(db, 'submissions');
+    
+    // Filter by current user's submissions
+    q = query(q, where('artistId', '==', currentUser.uid));
+    
+    // Apply status filter if not 'all'
+    if (statusFilter !== 'all') {
+      q = query(q, where('status', '==', statusFilter));
+    }
+    
+    // Order by creation date (newest first)
+    q = query(q, orderBy('createdAt', 'desc'));
+    
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      console.log('📡 Firebase real-time update received:', snapshot.docs.length, 'submissions');
+      
+      const submissionsData = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+        createdAt: doc.data().createdAt?.toDate?.()?.toISOString() || null,
+        updatedAt: doc.data().updatedAt?.toDate?.()?.toISOString() || null
+      }));
+      
+      setSubmissions(submissionsData);
+      setLoading(false);
+      setError(null);
+    }, (error) => {
+      console.error('❌ Firebase listener error:', error);
+      setError('Failed to load submissions');
+      setLoading(false);
+    });
+    
+    // Cleanup listener on unmount or filter change
+    return () => {
+      console.log('🧹 Cleaning up Firebase listener for artist submissions');
+      unsubscribe();
+    };
+  }, [currentUser, statusFilter]);
 
   // Delete submission
   const deleteSubmission = async (submissionId) => {
@@ -92,25 +121,23 @@ const SubmissionHistory = () => {
     }
 
     try {
-      await axios.delete(`/api/submissions/${submissionId}`);
-      setSubmissions(prev => prev.filter(s => s.id !== submissionId));
+      // Delete from Firestore
+      await deleteDoc(doc(db, 'submissions', submissionId));
+      
+      // Close details dialog if the deleted submission was selected
       if (selectedSubmission?.id === submissionId) {
         setDetailsOpen(false);
       }
     } catch (error) {
-      setError(error.response?.data?.error || 'Failed to delete submission');
+      console.error('Error deleting submission:', error);
+      setError('Failed to delete submission');
     }
   };
 
   // View submission details
-  const viewDetails = async (submission) => {
-    try {
-      const response = await axios.get(`/api/submissions/${submission.id}`);
-      setSelectedSubmission(response.data);
-      setDetailsOpen(true);
-    } catch (error) {
-      setError(error.response?.data?.error || 'Failed to fetch submission details');
-    }
+  const viewDetails = (submission) => {
+    setSelectedSubmission(submission);
+    setDetailsOpen(true);
   };
 
   // Format date
@@ -152,7 +179,7 @@ const SubmissionHistory = () => {
         </Typography>
         <Button
           startIcon={<Refresh />}
-          onClick={fetchSubmissions}
+          onClick={() => setLoading(true)}
           disabled={loading}
         >
           Refresh
@@ -404,18 +431,28 @@ const SubmissionHistory = () => {
                                 </Box>
                               }
                             />
-                            <Box sx={{ display: 'flex', gap: 1 }}>
-                              {track.downloadURL && (
-                                <Tooltip title="Download">
-                                  <IconButton 
-                                    size="small"
-                                    href={track.downloadURL}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                  >
-                                    <Download />
-                                  </IconButton>
-                                </Tooltip>
+                            <Box sx={{ display: 'flex', gap: 1, flexDirection: 'column' }}>
+                              {track.audioUrl && (
+                                <>
+                                  {/* Audio Player */}
+                                  <audio controls style={{ width: '100%', maxWidth: '300px' }}>
+                                    <source src={track.audioUrl} type={track.mimeType || 'audio/mpeg'} />
+                                    Your browser does not support the audio element.
+                                  </audio>
+                                  
+                                  {/* Download Link */}
+                                  <Tooltip title="Download">
+                                    <IconButton 
+                                      size="small"
+                                      href={track.audioUrl}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      download
+                                    >
+                                      <Download />
+                                    </IconButton>
+                                  </Tooltip>
+                                </>
                               )}
                             </Box>
                           </ListItem>

@@ -57,8 +57,7 @@ TuneDrop is a platform that allows artists to submit their music demos to a labe
 
 ### Phase 5: Email Integration (Planned)
 - [ ] Automated confirmations
-- [ ] Status update emails
-- [ ] Email template editor
+
 
 ### Phase 6: Real-time Features (Planned)
 - [ ] Live submission updates
@@ -71,7 +70,6 @@ TuneDrop is a platform that allows artists to submit their music demos to a labe
 - Node.js (v16 or higher)
 - npm or yarn
 - Firebase project
-- SendGrid account (for emails)
 
 ### 1. Clone the Repository
 ```bash
@@ -116,9 +114,7 @@ FIREBASE_CLIENT_EMAIL=firebase-adminsdk-xxxxx@your-project.iam.gserviceaccount.c
 PORT=5000
 NODE_ENV=development
 
-# Email Configuration (SendGrid)
-SENDGRID_API_KEY=your_sendgrid_api_key
-SENDGRID_FROM_EMAIL=submissions@yourlabel.com
+
 
 # JWT Secret
 JWT_SECRET=your_jwt_secret_key_here

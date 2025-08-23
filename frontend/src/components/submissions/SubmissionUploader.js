@@ -37,8 +37,13 @@ import {
 } from '@mui/icons-material';
 import { useDropzone } from 'react-dropzone';
 import axios from 'axios';
+import { useAuth } from '../../contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 const SubmissionUploader = ({ onSubmissionCreated, onClose }) => {
+  const { currentUser } = useAuth();
+  const navigate = useNavigate();
+  
   const [submissionData, setSubmissionData] = useState({
     title: '',
     description: ''
@@ -169,6 +174,16 @@ const SubmissionUploader = ({ onSubmissionCreated, onClose }) => {
 
   // Handle submission
   const handleSubmit = async () => {
+    // Check authentication first
+    const token = localStorage.getItem('authToken');
+    if (!token || !currentUser) {
+      setError('Please log in to submit tracks. Redirecting to login...');
+      setTimeout(() => {
+        navigate('/login');
+      }, 2000);
+      return;
+    }
+
     if (!submissionData.title) {
       setError('Submission title is required');
       return;
@@ -219,6 +234,15 @@ const SubmissionUploader = ({ onSubmissionCreated, onClose }) => {
       });
 
       await Promise.all(uploadPromises);
+
+      // Send confirmation email
+      try {
+        await axios.post(`/api/submissions/send-confirmation/${submissionId}`);
+        console.log('✅ Confirmation email sent');
+      } catch (emailError) {
+        console.warn('⚠️ Failed to send confirmation email:', emailError);
+        // Don't fail the submission if email fails
+      }
 
       setSuccess(true);
       if (onSubmissionCreated) {
@@ -284,8 +308,34 @@ const SubmissionUploader = ({ onSubmissionCreated, onClose }) => {
     );
   }
 
+  // Show login required message if not authenticated
+  if (!currentUser) {
+    return (
+      <Paper sx={{ p: 4, textAlign: 'center' }}>
+        <Info sx={{ fontSize: 64, color: 'info.main', mb: 2 }} />
+        <Typography variant="h4" gutterBottom>
+          Authentication Required
+        </Typography>
+        <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
+          Please log in to submit your music tracks.
+        </Typography>
+        <Button variant="contained" onClick={() => navigate('/login')}>
+          Go to Login
+        </Button>
+      </Paper>
+    );
+  }
+
   return (
     <Box>
+      {/* User Info */}
+      <Alert severity="info" sx={{ mb: 3 }}>
+        <Typography variant="body2">
+          <strong>Logged in as:</strong> {currentUser.displayName || currentUser.email}
+          {currentUser.role && ` (${currentUser.role})`}
+        </Typography>
+      </Alert>
+
       {/* Submission Details */}
       <Paper sx={{ p: 3, mb: 3 }}>
         <Typography variant="h6" gutterBottom>

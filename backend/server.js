@@ -2,8 +2,6 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
-const { createServer } = require('http');
-const { Server } = require('socket.io');
 const path = require('path');
 require('dotenv').config();
 
@@ -15,15 +13,6 @@ const submissionRoutes = require('./routes/submissions');
 const { auth } = require('./config/firebase');
 
 const app = express();
-const server = createServer(app);
-
-// Socket.io setup
-const io = new Server(server, {
-  cors: {
-    origin: process.env.FRONTEND_URL || "http://localhost:3000",
-    methods: ["GET", "POST"]
-  }
-});
 
 // Security middleware
 app.use(helmet());
@@ -71,63 +60,7 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// Socket.io authentication middleware
-io.use(async (socket, next) => {
-  try {
-    const token = socket.handshake.auth.token;
-    if (!token) {
-      return next(new Error('Authentication error'));
-    }
 
-    const decodedToken = await auth.verifyIdToken(token);
-    socket.userId = decodedToken.uid;
-    socket.userEmail = decodedToken.email;
-    next();
-  } catch (error) {
-    next(new Error('Authentication error'));
-  }
-});
-
-// Socket.io connection handling
-io.on('connection', (socket) => {
-  console.log(`User connected: ${socket.userEmail} (${socket.userId})`);
-
-  // Join admin room if user is admin
-  socket.on('join-admin-room', async () => {
-    try {
-      // Verify user is admin (you might want to check this in Firestore)
-      socket.join('admin-room');
-      console.log(`Admin joined admin room: ${socket.userEmail}`);
-    } catch (error) {
-      console.error('Error joining admin room:', error);
-    }
-  });
-
-  // Handle new submission notification
-  socket.on('new-submission', (data) => {
-    // Broadcast to admin room
-    socket.to('admin-room').emit('submission-received', data);
-  });
-
-  // Handle submission status updates
-  socket.on('submission-updated', (data) => {
-    socket.to('admin-room').emit('submission-status-changed', data);
-  });
-
-  // Handle admin activity
-  socket.on('admin-activity', (data) => {
-    socket.to('admin-room').emit('admin-activity-update', {
-      ...data,
-      adminId: socket.userId,
-      adminEmail: socket.userEmail,
-      timestamp: new Date()
-    });
-  });
-
-  socket.on('disconnect', () => {
-    console.log(`User disconnected: ${socket.userEmail}`);
-  });
-});
 
 // Error handling middleware
 app.use((err, req, res, next) => {
@@ -142,10 +75,9 @@ app.use('*', (req, res) => {
 
 const PORT = process.env.PORT || 5000;
 
-server.listen(PORT, () => {
+app.listen(PORT, () => {
   console.log(`🚀 TuneDrop Backend running on port ${PORT}`);
-  console.log(`📡 WebSocket server ready for real-time connections`);
   console.log(`🔗 Health check: http://localhost:${PORT}/api/health`);
 });
 
-module.exports = { app, server, io }; 
+module.exports = { app }; 

@@ -26,7 +26,7 @@ if (hasFirebaseConfig) {
     if (!admin.apps.length) {
       admin.initializeApp({
         credential: admin.credential.cert(serviceAccount),
-        storageBucket: `${process.env.FIREBASE_PROJECT_ID}.appspot.com`
+        storageBucket: 'tunedrop-c775f.firebasestorage.app'
       });
       firebaseInitialized = true;
       console.log('✅ Firebase Admin SDK initialized successfully');

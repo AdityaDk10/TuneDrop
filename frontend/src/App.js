@@ -80,36 +80,36 @@ function App() {
       <AuthProvider>
         <Router>
           <Routes>
-            {/* Public Routes */}
-            <Route path="/login" element={<LoginForm />} />
-            <Route path="/register/artist" element={<ArtistRegistrationForm />} />
-            <Route path="/register/admin" element={<AdminRegistrationForm />} />
-            
-            {/* Protected Routes - Admin */}
-            <Route 
-              path="/admin/*" 
-              element={
-                <ProtectedRoute requiredRole="admin">
-                  <AdminDashboard />
-                </ProtectedRoute>
-              } 
-            />
-            
-            {/* Protected Routes - Artist */}
-            <Route 
-              path="/artist/*" 
-              element={
-                <ProtectedRoute requiredRole="artist">
-                  <ArtistDashboard />
-                </ProtectedRoute>
-              } 
-            />
-            
-            {/* Default redirect based on user role */}
-            <Route path="/" element={<RoleBasedRedirect />} />
-            <Route path="*" element={<Navigate to="/login" replace />} />
-          </Routes>
-        </Router>
+          {/* Public Routes */}
+          <Route path="/login" element={<LoginForm />} />
+          <Route path="/register/artist" element={<ArtistRegistrationForm />} />
+          <Route path="/register/admin" element={<AdminRegistrationForm />} />
+          
+          {/* Protected Routes - Admin */}
+          <Route 
+            path="/admin/*" 
+            element={
+              <ProtectedRoute requiredRole="admin">
+                <AdminDashboard />
+              </ProtectedRoute>
+            } 
+          />
+          
+          {/* Protected Routes - Artist */}
+          <Route 
+            path="/artist/*" 
+            element={
+              <ProtectedRoute requiredRole="artist">
+                <ArtistDashboard />
+              </ProtectedRoute>
+            } 
+          />
+          
+          {/* Default redirect based on user role */}
+          <Route path="/" element={<RoleBasedRedirect />} />
+          <Route path="*" element={<Navigate to="/login" replace />} />
+        </Routes>
+      </Router>
       </AuthProvider>
     </ThemeProvider>
   );

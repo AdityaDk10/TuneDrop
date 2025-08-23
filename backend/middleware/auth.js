@@ -7,7 +7,14 @@ const verifyToken = async (req, res, next) => {
     const authHeader = req.headers.authorization;
     const token = authHeader?.split('Bearer ')[1] || authHeader?.split(' ')[1];
     
+    console.log('🔍 Auth Debug:', { 
+      authHeader: authHeader ? 'Present' : 'Missing',
+      tokenExists: !!token,
+      tokenStart: token ? token.substring(0, 20) + '...' : 'None'
+    });
+    
     if (!token) {
+      console.log('❌ No token provided in request');
       return res.status(401).json({ error: 'No token provided' });
     }
 
@@ -16,14 +23,35 @@ const verifyToken = async (req, res, next) => {
     try {
       // Try to verify as ID token first
       decodedToken = await auth.verifyIdToken(token);
+      console.log('✅ ID Token verified successfully');
     } catch (idTokenError) {
       try {
-        // For development: allow custom tokens
-        // Verify the user exists in Firebase by getting user record
-        const userRecord = await auth.getUser(token);
-        decodedToken = { uid: userRecord.uid, email: userRecord.email };
+        // For development: decode custom token manually
+        // Custom tokens are JWT tokens that can be decoded
+        const jwt = require('jsonwebtoken');
+        const decoded = jwt.decode(token);
+        
+        if (decoded && decoded.uid) {
+          // Verify the user exists in Firestore
+          const userDoc = await db.collection('users').doc(decoded.uid).get();
+          if (userDoc.exists) {
+            decodedToken = { 
+              uid: decoded.uid, 
+              email: userDoc.data().email,
+              ...decoded 
+            };
+            console.log('✅ Custom Token verified successfully for:', decoded.uid);
+          } else {
+            throw new Error('User not found in database');
+          }
+        } else {
+          throw new Error('Invalid token structure');
+        }
       } catch (customTokenError) {
-        console.error('Token verification failed:', { idTokenError: idTokenError.message, customTokenError: customTokenError.message });
+        console.error('Token verification failed:', { 
+          idTokenError: idTokenError.message, 
+          customTokenError: customTokenError.message 
+        });
         return res.status(401).json({ error: 'Invalid token' });
       }
     }
