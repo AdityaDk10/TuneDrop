@@ -9,7 +9,10 @@ import {
 import { auth } from '../config/firebase';
 import axios from 'axios';
 
-// Configure axios to include auth token
+// Configure axios base URL and auth token
+const backendUrl = process.env.REACT_APP_BACKEND_URL || 'https://tunedrop.onrender.com';
+axios.defaults.baseURL = backendUrl;
+
 axios.interceptors.request.use((config) => {
   const token = localStorage.getItem('authToken');
   if (token) {
