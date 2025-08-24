@@ -1,4 +1,5 @@
 const nodemailer = require('nodemailer');
+const sgMail = require('@sendgrid/mail');
 const fs = require('fs').promises;
 const path = require('path');
 
@@ -14,9 +15,21 @@ const ensureEmailDirectory = async () => {
   }
 };
 
-// Create transporter for Gmail SMTP or local SMTP
+// Initialize SendGrid
+const initializeSendGrid = () => {
+  const apiKey = process.env.SENDGRID_API_KEY;
+  if (!apiKey) {
+    console.warn('⚠️ SENDGRID_API_KEY not found in environment variables');
+    return false;
+  }
+  
+  sgMail.setApiKey(apiKey);
+  console.log('✅ SendGrid initialized successfully');
+  return true;
+};
+
+// Create transporter for Gmail SMTP (fallback)
 const createTransporter = () => {
-  // Use Gmail SMTP for reliable email sending
   return nodemailer.createTransport({
     service: 'gmail',
     host: 'smtp.gmail.com',
@@ -224,13 +237,24 @@ const emailService = {
         submissionId: submissionId
       };
 
-      // Send via SMTP (Gmail)
+      // Try SendGrid first, fallback to Gmail SMTP
+      if (initializeSendGrid()) {
+        try {
+          const result = await sgMail.send(emailData);
+          console.log('✅ Email sent via SendGrid:', result[0].headers['x-message-id']);
+          return { success: true, messageId: result[0].headers['x-message-id'], method: 'sendgrid' };
+        } catch (sendgridError) {
+          console.error('❌ SendGrid failed, trying Gmail SMTP:', sendgridError.message);
+        }
+      }
+
+      // Fallback to Gmail SMTP
       const transporter = createTransporter();
       const result = await transporter.sendMail(emailData);
-      console.log('Email sent via Gmail SMTP:', result.messageId);
+      console.log('✅ Email sent via Gmail SMTP:', result.messageId);
       return { success: true, messageId: result.messageId, method: 'smtp' };
     } catch (error) {
-      console.error('Error sending submission confirmation email:', error);
+      console.error('❌ Error sending submission confirmation email:', error);
       return { success: false, error: error.message };
     }
   },
@@ -250,13 +274,24 @@ const emailService = {
         submissionId: submissionId
       };
 
-      // Send via SMTP (Gmail)
+      // Try SendGrid first, fallback to Gmail SMTP
+      if (initializeSendGrid()) {
+        try {
+          const result = await sgMail.send(emailData);
+          console.log('✅ Approval email sent via SendGrid:', result[0].headers['x-message-id']);
+          return { success: true, messageId: result[0].headers['x-message-id'], method: 'sendgrid' };
+        } catch (sendgridError) {
+          console.error('❌ SendGrid failed, trying Gmail SMTP:', sendgridError.message);
+        }
+      }
+
+      // Fallback to Gmail SMTP
       const transporter = createTransporter();
       const result = await transporter.sendMail(emailData);
-      console.log('Approval email sent via Gmail SMTP:', result.messageId);
+      console.log('✅ Approval email sent via Gmail SMTP:', result.messageId);
       return { success: true, messageId: result.messageId, method: 'smtp' };
     } catch (error) {
-      console.error('Error sending approval email:', error);
+      console.error('❌ Error sending approval email:', error);
       return { success: false, error: error.message };
     }
   },
@@ -276,13 +311,24 @@ const emailService = {
         submissionId: submissionId
       };
 
-      // Send via SMTP (Gmail)
+      // Try SendGrid first, fallback to Gmail SMTP
+      if (initializeSendGrid()) {
+        try {
+          const result = await sgMail.send(emailData);
+          console.log('✅ Rejection email sent via SendGrid:', result[0].headers['x-message-id']);
+          return { success: true, messageId: result[0].headers['x-message-id'], method: 'sendgrid' };
+        } catch (sendgridError) {
+          console.error('❌ SendGrid failed, trying Gmail SMTP:', sendgridError.message);
+        }
+      }
+
+      // Fallback to Gmail SMTP
       const transporter = createTransporter();
       const result = await transporter.sendMail(emailData);
-      console.log('Rejection email sent via Gmail SMTP:', result.messageId);
+      console.log('✅ Rejection email sent via Gmail SMTP:', result.messageId);
       return { success: true, messageId: result.messageId, method: 'smtp' };
     } catch (error) {
-      console.error('Error sending rejection email:', error);
+      console.error('❌ Error sending rejection email:', error);
       return { success: false, error: error.message };
     }
   },
@@ -328,13 +374,24 @@ const emailService = {
         type: 'test'
       };
 
-      // Send via SMTP (Gmail)
+      // Try SendGrid first, fallback to Gmail SMTP
+      if (initializeSendGrid()) {
+        try {
+          const result = await sgMail.send(emailData);
+          console.log('✅ Test email sent via SendGrid:', result[0].headers['x-message-id']);
+          return { success: true, messageId: result[0].headers['x-message-id'], method: 'sendgrid', sentTo: testEmail };
+        } catch (sendgridError) {
+          console.error('❌ SendGrid failed, trying Gmail SMTP:', sendgridError.message);
+        }
+      }
+
+      // Fallback to Gmail SMTP
       const transporter = createTransporter();
       const result = await transporter.sendMail(emailData);
-      console.log('Test email sent via Gmail SMTP:', result.messageId);
+      console.log('✅ Test email sent via Gmail SMTP:', result.messageId);
       return { success: true, messageId: result.messageId, method: 'smtp', sentTo: testEmail };
     } catch (error) {
-      console.error('Error testing email service:', error);
+      console.error('❌ Error testing email service:', error);
       return { success: false, error: error.message };
     }
   }
