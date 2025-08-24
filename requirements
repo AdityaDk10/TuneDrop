@@ -77,8 +77,8 @@ When working with LLMs, please make sure to include the exact prompts you used f
 Getting Started
 To help you test, here is some sample data:
 Admin User:
-Email: admin@yourlabel.com
-Password: admin123
+Email: admin@tunedrop.com
+Password: AdminTuneDrop2024!
 Test Artists & Tracks:
 Artist: Alex Chen (alex.chen@email.com)
 Track 1: "Midnight Pulse", Electronic, 128 BPM, C minor

@@ -242,10 +242,10 @@ const LoginForm = () => {
               <strong>Test Admin Credentials:</strong>
             </Typography>
             <Typography variant="caption" color="text.secondary" display="block">
-              Email: admin@yourlabel.com
+              Email: admin@tunedrop.com
             </Typography>
             <Typography variant="caption" color="text.secondary" display="block">
-              Password: admin123
+              Password: AdminTuneDrop2024!
             </Typography>
           </Box>
         </Box>

@@ -155,7 +155,7 @@ Since admin registration is protected, you'll need to create the first admin use
 ## 🧪 Testing
 
 ### Test Credentials
-- **Admin**: admin@yourlabel.com / admin123
+- **Admin**: admin@tunedrop.com / AdminTuneDrop2024!
 - **Artist**: Register through the application
 
 ### API Endpoints
