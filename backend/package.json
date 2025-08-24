@@ -2,7 +2,7 @@
   "name": "tunedrop-backend",
   "version": "1.0.0",
   "description": "TuneDrop Music Demo Submission Platform Backend",
-  "main": "api/index.js",
+  "main": "server.js",
   "engines": {
     "node": "18.x"
   },
