@@ -148,7 +148,19 @@ const ArtistRegistrationForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!validateStep(activeStep)) return;
+    
+    // Only submit if we're on the final step
+    if (activeStep !== steps.length - 1) {
+      return;
+    }
+    
+    // Validate all steps before submitting
+    for (let i = 0; i < steps.length; i++) {
+      if (!validateStep(i)) {
+        setActiveStep(i);
+        return;
+      }
+    }
     
     setLoading(true);
     setError(null);
@@ -505,6 +517,7 @@ const ArtistRegistrationForm = () => {
           {/* Navigation Buttons */}
           <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 4 }}>
             <Button
+              type="button"
               disabled={activeStep === 0}
               onClick={handleBack}
               startIcon={<ArrowBack />}
@@ -538,6 +551,7 @@ const ArtistRegistrationForm = () => {
                 </Button>
               ) : (
                 <Button
+                  type="button"
                   variant="contained"
                   onClick={handleNext}
                   sx={{

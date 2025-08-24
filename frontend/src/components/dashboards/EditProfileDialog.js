@@ -24,10 +24,9 @@ import {
   Save
 } from '@mui/icons-material';
 import { useAuth } from '../../contexts/AuthContext';
-import axios from 'axios';
 
 const EditProfileDialog = ({ open, onClose, onProfileUpdated }) => {
-  const { currentUser } = useAuth();
+  const { currentUser, updateProfileData } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -116,8 +115,8 @@ const EditProfileDialog = ({ open, onClose, onProfileUpdated }) => {
         return;
       }
 
-      // Update profile through backend API
-      const response = await axios.put('/api/auth/profile', {
+      // Update profile through AuthContext (which handles authentication properly)
+      await updateProfileData({
         displayName: formData.displayName.trim(),
         bio: formData.bio.trim(),
         socialMedia: formData.socialMedia
@@ -137,7 +136,17 @@ const EditProfileDialog = ({ open, onClose, onProfileUpdated }) => {
 
     } catch (error) {
       console.error('Error updating profile:', error);
-      setError('Failed to update profile. Please try again.');
+      
+      // Handle specific error cases
+      if (error.response?.status === 401) {
+        setError('Authentication failed. Please login again.');
+      } else if (error.response?.status === 403) {
+        setError('Access denied. Please check your permissions.');
+      } else if (error.response?.data?.error) {
+        setError(error.response.data.error);
+      } else {
+        setError('Failed to update profile. Please try again.');
+      }
     } finally {
       setLoading(false);
     }

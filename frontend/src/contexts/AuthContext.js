@@ -185,14 +185,12 @@ export const AuthProvider = ({ children }) => {
   // Get user profile
   const getProfile = async () => {
     try {
-      const idToken = await auth.currentUser?.getIdToken();
-      if (!idToken) return null;
+      // Check if auth token exists
+      const token = localStorage.getItem('authToken');
+      if (!token) return null;
       
-      const response = await axios.get('/api/auth/profile', {
-        headers: {
-          Authorization: `Bearer ${idToken}`
-        }
-      });
+      // Let axios interceptor handle the Authorization header
+      const response = await axios.get('/api/auth/profile');
       
       setCurrentUser(response.data.user);
       setUserRole(response.data.user.role);
@@ -208,13 +206,15 @@ export const AuthProvider = ({ children }) => {
   const updateProfileData = async (profileData) => {
     try {
       setError(null);
-      const idToken = await auth.currentUser?.getIdToken();
       
-      const response = await axios.put('/api/auth/profile', profileData, {
-        headers: {
-          Authorization: `Bearer ${idToken}`
-        }
-      });
+      // Check if auth token exists
+      const token = localStorage.getItem('authToken');
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
+      
+      // Let axios interceptor handle the Authorization header
+      const response = await axios.put('/api/auth/profile', profileData);
       
       // Update local user data
       await getProfile();
