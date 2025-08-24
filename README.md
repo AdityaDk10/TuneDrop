@@ -13,58 +13,16 @@ TuneDrop is a platform that allows artists to submit their music demos to a labe
 - **Material UI** - Beautiful, responsive UI components
 - **React Router** - Client-side routing
 - **Firebase Auth** - User authentication
-- **Event listeners** - Real Time updates
 
 ### Backend
 - **Node.js** - Server runtime
 - **Express.js** - Web framework
 - **Firebase Admin SDK** - Backend Firebase integration
-- **Socket.io** - Real-time WebSocket server
 - **Firestore** - NoSQL database
 - **Firebase Storage** - File storage
-
-### Infrastructure
-- **Firebase Hosting** - Frontend deployment
-- **Railway/Heroku** - Backend deployment
 - **SendGrid** - Email service
 
-## 📋 Features
-
-### Phase 1: Authentication & User Management ✅
-- [x] User registration (Artists & Admins)
-- [x] Secure login/logout
-- [x] Role-based access control
-- [x] Protected routes
-- [x] User profile management
-
-### Phase 2: File Upload System (Coming Next)
-- [ ] Multi-track uploader
-- [ ] Progress tracking
-- [ ] File validation
-- [ ] Firebase Storage integration
-
-### Phase 3: Artist Submission Portal (Planned)
-- [ ] Track submission form
-- [ ] Artist dashboard
-- [ ] Submission history
-- [ ] Status tracking
-
-### Phase 4: Admin Dashboard (Planned)
-- [ ] Submission management
-- [ ] Audio player with waveform
-- [ ] Review & grading system
-- [ ] Real-time notifications
-
-### Phase 5: Email Integration (Planned)
-- [ ] Automated confirmations
-
-
-### Phase 6: Real-time Features (Planned)
-- [ ] Live submission updates
-- [ ] Admin activity indicators
-- [ ] Real-time collaboration
-
-## 🛠️ Setup Instructions
+## 🛠️ Setup and Installation Instructions
 
 ### Prerequisites
 - Node.js (v16 or higher)
@@ -114,13 +72,20 @@ FIREBASE_CLIENT_EMAIL=firebase-adminsdk-xxxxx@your-project.iam.gserviceaccount.c
 PORT=5000
 NODE_ENV=development
 
-
-
 # JWT Secret
 JWT_SECRET=your_jwt_secret_key_here
 
 # CORS Configuration
 FRONTEND_URL=http://localhost:3000
+
+# Email Configuration - SendGrid (Recommended for Production)
+SENDGRID_API_KEY=your_sendgrid_api_key_here
+EMAIL_FROM=submissions@tunedrop.com
+TEST_EMAIL=your-email@example.com
+
+# Email Configuration - Gmail SMTP (Fallback)
+GMAIL_USER=your-gmail@gmail.com
+GMAIL_APP_PASSWORD=your-gmail-app-password
 ```
 
 #### Start Backend Server
@@ -133,6 +98,19 @@ npm run dev
 ```bash
 cd frontend
 npm install
+```
+
+#### Environment Variables
+Create a `.env` file in the `frontend` directory:
+
+```env
+REACT_APP_BACKEND_URL=http://localhost:5000
+REACT_APP_FIREBASE_API_KEY=your_firebase_api_key
+REACT_APP_FIREBASE_AUTH_DOMAIN=your-project.firebaseapp.com
+REACT_APP_FIREBASE_PROJECT_ID=your-project-id
+REACT_APP_FIREBASE_STORAGE_BUCKET=your-project.appspot.com
+REACT_APP_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
+REACT_APP_FIREBASE_APP_ID=your_app_id
 ```
 
 #### Start Frontend Development Server
@@ -152,24 +130,111 @@ Since admin registration is protected, you'll need to create the first admin use
 4. Find your user document in the `users` collection
 5. Change the `role` field from `"artist"` to `"admin"`
 
-## 🧪 Testing
+## 📊 Database Schema
 
-### Test Credentials
-- **Admin**: admin@tunedrop.com / AdminTuneDrop2024!
-- **Artist**: Register through the application
+### Collections
 
-### API Endpoints
+#### `users`
+Stores user account information and profiles.
 
-#### Authentication
-- `POST /api/auth/register/artist` - Artist registration
-- `POST /api/auth/register/admin` - Admin registration (protected)
-- `POST /api/auth/login` - User login
-- `GET /api/auth/profile` - Get user profile
-- `PUT /api/auth/profile` - Update user profile
-- `POST /api/auth/logout` - User logout
+```javascript
+{
+  uid: "string",                    // Firebase Auth UID
+  email: "string",                  // User email
+  displayName: "string",            // Display name
+  phoneNumber: "string",            // Phone number with country code
+  role: "artist" | "admin",         // User role
+  createdAt: "timestamp",           // Account creation date
+  lastLogin: "timestamp",           // Last login date
+  
+  // Artist-specific fields
+  artistName: "string",             // Artist/stage name
+  bio: "string",                    // Artist biography
+  socialMedia: {                    // Social media links
+    instagram: "string",
+    twitter: "string",
+    youtube: "string"
+  },
+  
+  // Admin-specific fields
+  permissions: ["array"],           // Admin permissions
+  isActive: "boolean"               // Admin account status
+}
+```
 
-#### Health Check
-- `GET /api/health` - Server health check
+#### `submissions`
+Stores music demo submissions from artists.
+
+```javascript
+{
+  id: "string",                     // Submission ID
+  title: "string",                  // Submission title
+  description: "string",            // Submission description
+  artistId: "string",               // Artist's UID
+  artistName: "string",             // Artist name
+  artistEmail: "string",            // Artist email
+  status: "pending" | "in-review" | "approved" | "rejected",
+  tracks: [                         // Array of tracks
+    {
+      id: "string",                 // Track ID
+      title: "string",              // Track title
+      genre: "string",              // Music genre
+      bpm: "number",                // Beats per minute
+      key: "string",                // Musical key
+      description: "string",        // Track description
+      filename: "string",           // Original filename
+      storageFilename: "string",    // Firebase Storage filename
+      storagePath: "string",        // Firebase Storage path
+      audioUrl: "string",           // Public audio URL
+      fileSize: "number",           // File size in bytes
+      mimeType: "string",           // File MIME type
+      uploadedAt: "timestamp",      // Upload timestamp
+      duration: "number",           // Track duration (seconds)
+      waveformData: "object",       // Audio waveform data
+      bucket: "string"              // Storage bucket name
+    }
+  ],
+  totalTracks: "number",            // Total number of tracks
+  uploadedTracks: "number",         // Number of uploaded tracks
+  createdAt: "timestamp",           // Submission creation date
+  updatedAt: "timestamp",           // Last update date
+  reviewedBy: "string",             // Admin UID who reviewed
+  reviewScore: "number",            // Review score (1-10)
+  reviewNotes: "string",            // Public review notes
+  adminNotes: "string",             // Private admin notes
+  
+  // Email tracking
+  confirmationEmailSent: "boolean", // Confirmation email status
+  confirmationEmailSentAt: "timestamp",
+  confirmationEmailMessageId: "string",
+  emailMethod: "sendgrid" | "smtp"  // Email service used
+}
+```
+
+#### `emails` (Local Storage)
+Stores email history for admin dashboard (development/testing).
+
+```javascript
+{
+  id: "string",                     // Email ID
+  from: "string",                   // Sender email
+  to: "string",                     // Recipient email
+  subject: "string",                // Email subject
+  html: "string",                   // Email HTML content
+  timestamp: "string",              // Email timestamp
+  type: "submission_confirmation" | "approval" | "rejection" | "test",
+  submissionId: "string",           // Related submission ID
+  messageId: "string",              // Email service message ID
+  method: "sendgrid" | "smtp"       // Email service used
+}
+```
+
+### Indexes
+
+#### Firestore Indexes Required
+- `submissions` collection: `artistId` (for user submissions)
+- `submissions` collection: `status` (for admin filtering)
+- `submissions` collection: `createdAt` (for sorting)
 
 ## 📁 Project Structure
 
@@ -181,8 +246,13 @@ TuneDrop/
 │   ├── middleware/
 │   │   └── auth.js              # Authentication middleware
 │   ├── routes/
-│   │   └── auth.js              # Authentication routes
-│   ├── server.js                # Express server with Socket.io
+│   │   ├── auth.js              # Authentication routes
+│   │   ├── submissions.js       # Submission management
+│   │   └── email.js             # Email service routes
+│   ├── services/
+│   │   └── emailService.js      # Email service logic
+│   ├── uploads/                 # File upload directory
+│   ├── server.js                # Express server
 │   ├── package.json
 │   └── env.example
 ├── frontend/
@@ -192,9 +262,21 @@ TuneDrop/
 │   │   ├── components/
 │   │   │   ├── auth/
 │   │   │   │   ├── LoginForm.js
-│   │   │   │   └── ArtistRegistrationForm.js
-│   │   │   └── common/
-│   │   │       └── ProtectedRoute.js
+│   │   │   │   ├── ArtistRegistrationForm.js
+│   │   │   │   └── AdminRegistrationForm.js
+│   │   │   ├── common/
+│   │   │   │   ├── ProtectedRoute.js
+│   │   │   │   ├── AudioPlayer.js
+│   │   │   │   └── RoleBasedRedirect.js
+│   │   │   ├── dashboards/
+│   │   │   │   ├── AdminDashboard.js
+│   │   │   │   ├── ArtistDashboard.js
+│   │   │   │   ├── UserManagement.js
+│   │   │   │   └── EditProfileDialog.js
+│   │   │   └── submissions/
+│   │   │       ├── SubmissionUploader.js
+│   │   │       ├── SubmissionHistory.js
+│   │   │       └── AdminSubmissions.js
 │   │   ├── contexts/
 │   │   │   └── AuthContext.js   # Authentication context
 │   │   ├── config/
@@ -204,26 +286,6 @@ TuneDrop/
 │   └── package.json
 └── README.md
 ```
-
-## 🔒 Security Features
-
-- **Firebase Authentication** - Secure user authentication
-- **Role-based Access Control** - Admin/Artist role separation
-- **Protected Routes** - Route-level security
-- **Token Verification** - JWT token validation
-- **CORS Configuration** - Cross-origin security
-- **Rate Limiting** - API abuse prevention
-- **Input Validation** - Form data validation
-
-## 🎨 UI/UX Features
-
-- **Material UI Design** - Modern, professional interface
-- **Responsive Design** - Works on all devices
-- **Dark/Light Theme** - Customizable appearance
-- **Loading States** - User feedback
-- **Error Handling** - Clear error messages
-- **Form Validation** - Real-time validation
-- **Smooth Animations** - Enhanced user experience
 
 ## 🚀 Deployment
 
@@ -239,21 +301,9 @@ firebase deploy --only hosting
 2. Set environment variables
 3. Deploy automatically on push
 
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Test thoroughly
-5. Submit a pull request
-
 ## 📝 License
 
 This project is licensed under the MIT License.
-
-## 🆘 Support
-
-For support, please contact the development team or create an issue in the repository.
 
 ---
 
