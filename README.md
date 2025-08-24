@@ -13,7 +13,7 @@ TuneDrop is a platform that allows artists to submit their music demos to a labe
 - **Material UI** - Beautiful, responsive UI components
 - **React Router** - Client-side routing
 - **Firebase Auth** - User authentication
-- **Socket.io Client** - Real-time communication
+- **Event listeners** - Real Time updates
 
 ### Backend
 - **Node.js** - Server runtime
