@@ -17,12 +17,21 @@ router.post('/register/artist', async (req, res) => {
     const { email, password, displayName, phoneNumber, artistName, bio, socialMedia } = req.body;
 
     // Validate required fields
-    if (!email || !password || !displayName || !artistName) {
-      return res.status(400).json({ error: 'Missing required fields' });
+    const missingFields = [];
+    if (!email) missingFields.push('email');
+    if (!password) missingFields.push('password');
+    if (!displayName) missingFields.push('display name');
+    if (!artistName) missingFields.push('artist name');
+    if (!phoneNumber) missingFields.push('phone number');
+    
+    if (missingFields.length > 0) {
+      return res.status(400).json({ 
+        error: `Missing required fields: ${missingFields.join(', ')}` 
+      });
     }
 
-    // Validate phone number format if provided
-    if (phoneNumber && !/^\+?[1-9]\d{1,14}$/.test(phoneNumber.replace(/\s/g, ''))) {
+    // Validate phone number format
+    if (!/^\+?[1-9]\d{1,14}$/.test(phoneNumber.replace(/\s/g, ''))) {
       return res.status(400).json({ error: 'Invalid phone number format. Please include country code (e.g., +1234567890)' });
     }
 
@@ -67,7 +76,15 @@ router.post('/register/artist', async (req, res) => {
       return res.status(400).json({ error: 'Email already registered' });
     }
     
-    res.status(500).json({ error: 'Registration failed' });
+    if (error.code === 'auth/invalid-email') {
+      return res.status(400).json({ error: 'Invalid email format' });
+    }
+    
+    if (error.code === 'auth/weak-password') {
+      return res.status(400).json({ error: 'Password is too weak. Please use at least 6 characters' });
+    }
+    
+    res.status(500).json({ error: `Registration failed: ${error.message}` });
   }
 });
 
@@ -85,8 +102,21 @@ router.post('/create-first-admin', async (req, res) => {
     const { email, password, displayName, phoneNumber } = req.body;
 
     // Validate required fields
-    if (!email || !password || !displayName) {
-      return res.status(400).json({ error: 'Missing required fields' });
+    const missingFields = [];
+    if (!email) missingFields.push('email');
+    if (!password) missingFields.push('password');
+    if (!displayName) missingFields.push('display name');
+    if (!phoneNumber) missingFields.push('phone number');
+    
+    if (missingFields.length > 0) {
+      return res.status(400).json({ 
+        error: `Missing required fields: ${missingFields.join(', ')}` 
+      });
+    }
+
+    // Validate phone number format
+    if (!/^\+?[1-9]\d{1,14}$/.test(phoneNumber.replace(/\s/g, ''))) {
+      return res.status(400).json({ error: 'Invalid phone number format. Please include country code (e.g., +1234567890)' });
     }
 
     // Create user in Firebase Auth
@@ -129,7 +159,15 @@ router.post('/create-first-admin', async (req, res) => {
       return res.status(400).json({ error: 'Email already registered' });
     }
     
-    res.status(500).json({ error: 'Admin creation failed' });
+    if (error.code === 'auth/invalid-email') {
+      return res.status(400).json({ error: 'Invalid email format' });
+    }
+    
+    if (error.code === 'auth/weak-password') {
+      return res.status(400).json({ error: 'Password is too weak. Please use at least 6 characters' });
+    }
+    
+    res.status(500).json({ error: `Admin creation failed: ${error.message}` });
   }
 });
 
@@ -262,8 +300,21 @@ router.post('/register/admin', verifyToken, requireAdmin, async (req, res) => {
     const { email, password, displayName, phoneNumber } = req.body;
 
     // Validate required fields
-    if (!email || !password || !displayName) {
-      return res.status(400).json({ error: 'Missing required fields' });
+    const missingFields = [];
+    if (!email) missingFields.push('email');
+    if (!password) missingFields.push('password');
+    if (!displayName) missingFields.push('display name');
+    if (!phoneNumber) missingFields.push('phone number');
+    
+    if (missingFields.length > 0) {
+      return res.status(400).json({ 
+        error: `Missing required fields: ${missingFields.join(', ')}` 
+      });
+    }
+
+    // Validate phone number format
+    if (!/^\+?[1-9]\d{1,14}$/.test(phoneNumber.replace(/\s/g, ''))) {
+      return res.status(400).json({ error: 'Invalid phone number format. Please include country code (e.g., +1234567890)' });
     }
 
     // Create user in Firebase Auth
@@ -306,7 +357,15 @@ router.post('/register/admin', verifyToken, requireAdmin, async (req, res) => {
       return res.status(400).json({ error: 'Email already registered' });
     }
     
-    res.status(500).json({ error: 'Registration failed' });
+    if (error.code === 'auth/invalid-email') {
+      return res.status(400).json({ error: 'Invalid email format' });
+    }
+    
+    if (error.code === 'auth/weak-password') {
+      return res.status(400).json({ error: 'Password is too weak. Please use at least 6 characters' });
+    }
+    
+    res.status(500).json({ error: `Registration failed: ${error.message}` });
   }
 });
 

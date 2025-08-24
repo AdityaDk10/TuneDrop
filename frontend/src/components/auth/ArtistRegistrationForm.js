@@ -109,8 +109,10 @@ const ArtistRegistrationForm = () => {
         else if (formData.password !== formData.confirmPassword) newErrors.confirmPassword = 'Passwords do not match';
         
         if (!formData.displayName) newErrors.displayName = 'Display name is required';
-        // Phone number is optional but if provided, validate format
-        if (formData.phoneNumber && !/^\+?[1-9]\d{1,14}$/.test(formData.phoneNumber.replace(/\s/g, ''))) {
+        // Phone number is required
+        if (!formData.phoneNumber) {
+          newErrors.phoneNumber = 'Phone number is required';
+        } else if (!/^\+?[1-9]\d{1,14}$/.test(formData.phoneNumber.replace(/\s/g, ''))) {
           newErrors.phoneNumber = 'Please enter a valid phone number with country code (e.g., +1234567890)';
         }
         break;
@@ -209,12 +211,12 @@ const ArtistRegistrationForm = () => {
             <Grid item xs={12} sm={6}>
               <TextField
                 fullWidth
-                label="Phone Number (Optional)"
+                label="Phone Number"
                 name="phoneNumber"
                 value={formData.phoneNumber}
                 onChange={handleChange}
                 error={!!errors.phoneNumber}
-                helperText={errors.phoneNumber || "Include country code (e.g., +1234567890). 10-15 digits recommended."}
+                helperText={errors.phoneNumber || "Required. Include country code (e.g., +1234567890). 10-15 digits recommended."}
                 placeholder="+1234567890"
                 InputProps={{
                   startAdornment: (

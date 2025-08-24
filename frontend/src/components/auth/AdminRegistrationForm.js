@@ -69,6 +69,12 @@ const AdminRegistrationForm = () => {
     else if (formData.password !== formData.confirmPassword) newErrors.confirmPassword = 'Passwords do not match';
     
     if (!formData.displayName) newErrors.displayName = 'Display name is required';
+    
+    if (!formData.phoneNumber) {
+      newErrors.phoneNumber = 'Phone number is required';
+    } else if (!/^\+?[1-9]\d{1,14}$/.test(formData.phoneNumber.replace(/\s/g, ''))) {
+      newErrors.phoneNumber = 'Please enter a valid phone number with country code (e.g., +1234567890)';
+    }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -177,10 +183,12 @@ const AdminRegistrationForm = () => {
             <Grid item xs={12}>
               <TextField
                 fullWidth
-                label="Phone Number (Optional)"
+                label="Phone Number"
                 name="phoneNumber"
                 value={formData.phoneNumber}
                 onChange={handleChange}
+                error={!!errors.phoneNumber}
+                helperText={errors.phoneNumber || "Required. Include country code (e.g., +1234567890)"}
                 placeholder="+12345678901"
                 InputProps={{
                   startAdornment: (
