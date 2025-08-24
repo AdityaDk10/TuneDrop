@@ -24,16 +24,12 @@ import {
   Person,
   Phone,
   MusicNote,
-  Instagram,
-  Facebook,
-  Twitter,
-  YouTube,
   ArrowBack
 } from '@mui/icons-material';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
-const steps = ['Account Details', 'Artist Information', 'Social Media'];
+const steps = ['Account Details', 'Artist Information'];
 
 const ArtistRegistrationForm = () => {
   const [activeStep, setActiveStep] = useState(0);
@@ -47,17 +43,7 @@ const ArtistRegistrationForm = () => {
     
     // Artist Information
     artistName: '',
-    bio: '',
-    
-    // Social Media
-    socialMedia: {
-      instagram: '',
-      soundcloud: '',
-      spotify: '',
-      youtube: '',
-      facebook: '',
-      twitter: ''
-    }
+    bio: ''
   });
   
   const [showPassword, setShowPassword] = useState(false);
@@ -124,9 +110,7 @@ const ArtistRegistrationForm = () => {
         else if (formData.bio.length < 10) newErrors.bio = 'Bio must be at least 10 characters';
         break;
         
-      case 2: // Social Media (Optional - no validation required)
-        // Social media is optional, so no validation needed
-        break;
+
         
       default:
         break;
@@ -166,18 +150,20 @@ const ArtistRegistrationForm = () => {
     setError(null);
 
     try {
-      const result = await registerArtist(formData);
+      // Remove social media from formData since it's not needed for registration
+      const { socialMedia, ...registrationData } = formData;
+      const result = await registerArtist(registrationData);
       
-      // Show success message and redirect to login
-      if (result && result.user) {
-        // Show success message
-        setSuccess('Account created successfully! Please login with your credentials.');
-        
-        // Redirect to login page after a short delay
-        setTimeout(() => {
-          navigate('/login');
-        }, 2000);
-      }
+              // Show success message and redirect to login
+        if (result && result.user) {
+          // Show success message
+          setSuccess('Account created successfully! You can add social media links later in your profile. Please login with your credentials.');
+          
+          // Redirect to login page after a short delay
+          setTimeout(() => {
+            navigate('/login');
+          }, 3000);
+        }
     } catch (error) {
       console.error('Registration error:', error);
     } finally {
@@ -345,107 +331,7 @@ const ArtistRegistrationForm = () => {
           </Grid>
         );
 
-      case 2:
-        return (
-          <Grid container spacing={2}>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                label="Instagram"
-                name="social.instagram"
-                value={formData.socialMedia.instagram}
-                onChange={handleChange}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <Instagram color="action" />
-                    </InputAdornment>
-                  ),
-                }}
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                label="SoundCloud"
-                name="social.soundcloud"
-                value={formData.socialMedia.soundcloud}
-                onChange={handleChange}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <MusicNote color="action" />
-                    </InputAdornment>
-                  ),
-                }}
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                label="Spotify"
-                name="social.spotify"
-                value={formData.socialMedia.spotify}
-                onChange={handleChange}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <MusicNote color="action" />
-                    </InputAdornment>
-                  ),
-                }}
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                label="YouTube"
-                name="social.youtube"
-                value={formData.socialMedia.youtube}
-                onChange={handleChange}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <YouTube color="action" />
-                    </InputAdornment>
-                  ),
-                }}
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                label="Facebook"
-                name="social.facebook"
-                value={formData.socialMedia.facebook}
-                onChange={handleChange}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <Facebook color="action" />
-                    </InputAdornment>
-                  ),
-                }}
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                label="Twitter"
-                name="social.twitter"
-                value={formData.socialMedia.twitter}
-                onChange={handleChange}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <Twitter color="action" />
-                    </InputAdornment>
-                  ),
-                }}
-              />
-            </Grid>
-          </Grid>
-        );
+
 
       default:
         return null;

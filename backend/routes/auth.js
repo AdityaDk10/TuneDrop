@@ -52,7 +52,7 @@ router.post('/register/artist', async (req, res) => {
       role: 'artist',
       artistName,
       bio: bio || '',
-      socialMedia: socialMedia || {},
+      socialMedia: {}, // Initialize empty social media object
       createdAt: new Date(),
       lastLogin: new Date()
     };
