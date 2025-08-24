@@ -181,16 +181,24 @@ const SubmissionHistory = () => {
   }
 
   return (
-    <Box>
+    <Box sx={{ p: { xs: 2, sm: 3 } }}>
       {/* Header */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Typography variant="h5" gutterBottom>
+      <Box sx={{ 
+        display: 'flex', 
+        flexDirection: { xs: 'column', sm: 'row' },
+        justifyContent: 'space-between', 
+        alignItems: { xs: 'stretch', sm: 'center' }, 
+        gap: { xs: 2, sm: 0 },
+        mb: 3 
+      }}>
+        <Typography variant="h5" sx={{ textAlign: { xs: 'center', sm: 'left' } }}>
           My Submissions
         </Typography>
         <Button
           startIcon={<Refresh />}
           onClick={() => setLoading(true)}
           disabled={loading}
+          sx={{ width: { xs: '100%', sm: 'auto' } }}
         >
           Refresh
         </Button>
@@ -233,15 +241,15 @@ const SubmissionHistory = () => {
           </Typography>
         </Paper>
       ) : (
-        <TableContainer component={Paper}>
-          <Table>
+        <TableContainer component={Paper} sx={{ overflowX: 'auto' }}>
+          <Table sx={{ minWidth: { xs: 600, sm: 'auto' } }}>
             <TableHead>
               <TableRow>
                 <TableCell>Title</TableCell>
-                <TableCell>Tracks</TableCell>
-                <TableCell>Status</TableCell>
-                <TableCell>Submitted</TableCell>
-                <TableCell>Score</TableCell>
+                <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}>Tracks</TableCell>
+                <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>Status</TableCell>
+                <TableCell sx={{ display: { xs: 'none', lg: 'table-cell' } }}>Submitted</TableCell>
+                <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>Score</TableCell>
                 <TableCell>Actions</TableCell>
               </TableRow>
             </TableHead>
@@ -249,23 +257,40 @@ const SubmissionHistory = () => {
               {filteredSubmissions.map((submission) => (
                 <TableRow key={submission.id} hover>
                   <TableCell>
-                    <Typography variant="subtitle1" fontWeight="medium">
-                      {submission.title}
-                    </Typography>
-                    {submission.description && (
-                      <Typography variant="body2" color="text.secondary" noWrap>
-                        {submission.description}
+                    <Box>
+                      <Typography variant="subtitle1" fontWeight="medium">
+                        {submission.title}
                       </Typography>
-                    )}
+                      {submission.description && (
+                        <Typography variant="body2" color="text.secondary" noWrap>
+                          {submission.description}
+                        </Typography>
+                      )}
+                      {/* Show status and tracks on mobile */}
+                      <Box sx={{ display: { xs: 'flex', sm: 'none' }, gap: 1, mt: 1, flexWrap: 'wrap' }}>
+                        <Chip
+                          icon={statusIcons[submission.status]}
+                          label={getStatusText(submission.status)}
+                          color={statusColors[submission.status]}
+                          variant="outlined"
+                          size="small"
+                        />
+                        <Chip 
+                          label={`${submission.uploadedTracks || 0} tracks`}
+                          variant="outlined"
+                          size="small"
+                        />
+                      </Box>
+                    </Box>
                   </TableCell>
-                  <TableCell>
+                  <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}>
                     <Chip 
                       label={`${submission.uploadedTracks || 0} tracks`}
                       variant="outlined"
                       size="small"
                     />
                   </TableCell>
-                  <TableCell>
+                  <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>
                     <Chip
                       icon={statusIcons[submission.status]}
                       label={getStatusText(submission.status)}
@@ -273,12 +298,12 @@ const SubmissionHistory = () => {
                       variant="outlined"
                     />
                   </TableCell>
-                  <TableCell>
+                  <TableCell sx={{ display: { xs: 'none', lg: 'table-cell' } }}>
                     <Typography variant="body2">
                       {formatDate(submission.createdAt)}
                     </Typography>
                   </TableCell>
-                  <TableCell>
+                  <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>
                     {submission.reviewScore ? (
                       <Box sx={{ display: 'flex', alignItems: 'center' }}>
                         <Star sx={{ color: 'warning.main', mr: 0.5, fontSize: 20 }} />

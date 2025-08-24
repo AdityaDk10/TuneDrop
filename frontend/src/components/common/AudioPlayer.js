@@ -162,25 +162,31 @@ const AudioPlayer = ({ audioUrl, title, genre, onDownload, width = 300, height =
 
   if (error) {
     return (
-      <Box sx={{ p: 2, border: '1px solid #e0e0e0', borderRadius: 2, backgroundColor: '#fafafa' }}>
+      <Box sx={{ p: { xs: 1.5, sm: 2 }, border: '1px solid #e0e0e0', borderRadius: 2, backgroundColor: '#fafafa' }}>
         <Alert severity="warning" sx={{ mb: 2 }}>
           <Typography variant="body2">
             {error}
           </Typography>
         </Alert>
         
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
-          <Typography variant="subtitle2" fontWeight="bold">
+        <Box sx={{ 
+          display: 'flex', 
+          flexDirection: { xs: 'column', sm: 'row' },
+          alignItems: { xs: 'center', sm: 'flex-start' },
+          gap: { xs: 1, sm: 2 }, 
+          mb: 2 
+        }}>
+          <Typography variant="subtitle2" fontWeight="bold" sx={{ textAlign: { xs: 'center', sm: 'left' } }}>
             {title}
           </Typography>
           {genre && (
-            <Typography variant="caption" color="text.secondary">
+            <Typography variant="caption" color="text.secondary" sx={{ textAlign: { xs: 'center', sm: 'left' } }}>
               {genre}
             </Typography>
           )}
         </Box>
 
-        <Box sx={{ display: 'flex', gap: 1 }}>
+        <Box sx={{ display: 'flex', gap: 1, justifyContent: { xs: 'center', sm: 'flex-start' } }}>
           <IconButton 
             onClick={showNativeAudioPlayer}
             sx={{ 
@@ -198,10 +204,10 @@ const AudioPlayer = ({ audioUrl, title, genre, onDownload, width = 300, height =
 
         {showNativePlayer && (
           <Box sx={{ mt: 2 }}>
-            <Typography variant="caption" color="text.secondary" sx={{ mb: 1, display: 'block' }}>
+            <Typography variant="caption" color="text.secondary" sx={{ mb: 1, display: 'block', textAlign: { xs: 'center', sm: 'left' } }}>
               Native Audio Player:
             </Typography>
-            <audio controls style={{ width: '100%', maxWidth: '300px' }}>
+            <audio controls style={{ width: '100%', maxWidth: '100%' }}>
               <source src={audioUrl} type="audio/mpeg" />
               <source src={audioUrl} type="audio/wav" />
               <source src={audioUrl} type="audio/flac" />
@@ -216,9 +222,10 @@ const AudioPlayer = ({ audioUrl, title, genre, onDownload, width = 300, height =
   return (
     <Box sx={{ 
       display: 'flex', 
-      alignItems: 'center', 
-      gap: 2, 
-      p: 2, 
+      flexDirection: { xs: 'column', sm: 'row' },
+      alignItems: { xs: 'stretch', sm: 'center' },
+      gap: { xs: 1, sm: 2 }, 
+      p: { xs: 1.5, sm: 2 }, 
       border: '1px solid #e0e0e0', 
       borderRadius: 2,
       backgroundColor: '#fafafa'
@@ -229,14 +236,15 @@ const AudioPlayer = ({ audioUrl, title, genre, onDownload, width = 300, height =
         sx={{ 
           backgroundColor: 'primary.main', 
           color: 'white',
-          '&:hover': { backgroundColor: 'primary.dark' }
+          '&:hover': { backgroundColor: 'primary.dark' },
+          alignSelf: { xs: 'center', sm: 'flex-start' }
         }}
       >
         {isPlaying ? <Pause /> : <PlayArrow />}
       </IconButton>
 
       {/* Track Info */}
-      <Box sx={{ flex: 1, minWidth: 0 }}>
+      <Box sx={{ flex: 1, minWidth: 0, textAlign: { xs: 'center', sm: 'left' } }}>
         <Typography variant="subtitle2" fontWeight="bold" noWrap>
           {title}
         </Typography>
@@ -248,9 +256,9 @@ const AudioPlayer = ({ audioUrl, title, genre, onDownload, width = 300, height =
       </Box>
 
       {/* Progress Bar */}
-      <Box sx={{ flex: 1, maxWidth: width }}>
+      <Box sx={{ flex: 1, maxWidth: { xs: '100%', sm: width } }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-          <Typography variant="caption" color="text.secondary">
+          <Typography variant="caption" color="text.secondary" sx={{ minWidth: 'fit-content' }}>
             {formatTime(currentTime)}
           </Typography>
           <Box sx={{ 
@@ -272,14 +280,14 @@ const AudioPlayer = ({ audioUrl, title, genre, onDownload, width = 300, height =
               transition: 'width 0.1s ease'
             }} />
           </Box>
-          <Typography variant="caption" color="text.secondary">
+          <Typography variant="caption" color="text.secondary" sx={{ minWidth: 'fit-content' }}>
             {formatTime(duration)}
           </Typography>
         </Box>
         
         {/* Simple Waveform Visualization */}
         <Box sx={{ 
-          display: 'flex', 
+          display: { xs: 'none', md: 'flex' },
           alignItems: 'flex-end', 
           gap: 1, 
           height: height - 20,
@@ -307,7 +315,7 @@ const AudioPlayer = ({ audioUrl, title, genre, onDownload, width = 300, height =
       </Box>
 
       {/* Download Button */}
-      <IconButton onClick={handleDownload} size="small">
+      <IconButton onClick={handleDownload} size="small" sx={{ alignSelf: { xs: 'center', sm: 'flex-start' } }}>
         <Download />
       </IconButton>
     </Box>

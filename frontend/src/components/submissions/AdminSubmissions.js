@@ -171,12 +171,26 @@ const AdminSubmissions = ({ onBack }) => {
   }
 
   return (
-    <Box sx={{ p: 3 }}>
+    <Box sx={{ p: { xs: 2, sm: 3 } }}>
       {/* Header */}
-      <Box display="flex" alignItems="center" justifyContent="space-between" mb={3}>
-        <Typography variant="h4">Submissions Management</Typography>
-        <Box display="flex" gap={2}>
-          <FormControl size="small" sx={{ minWidth: 150 }}>
+      <Box sx={{ 
+        display: 'flex', 
+        flexDirection: { xs: 'column', sm: 'row' },
+        alignItems: { xs: 'stretch', sm: 'center' }, 
+        justifyContent: 'space-between', 
+        gap: { xs: 2, sm: 0 },
+        mb: 3 
+      }}>
+        <Typography variant="h4" sx={{ textAlign: { xs: 'center', sm: 'left' } }}>
+          Submissions Management
+        </Typography>
+        <Box sx={{ 
+          display: 'flex', 
+          flexDirection: { xs: 'column', sm: 'row' },
+          gap: 2,
+          width: { xs: '100%', sm: 'auto' }
+        }}>
+          <FormControl size="small" sx={{ minWidth: { xs: '100%', sm: 150 } }}>
             <InputLabel>Filter Status</InputLabel>
             <Select
               value={statusFilter}
@@ -198,6 +212,7 @@ const AdminSubmissions = ({ onBack }) => {
               setLoading(true);
             }}
             disabled={loading}
+            sx={{ width: { xs: '100%', sm: 'auto' } }}
           >
             Refresh
           </Button>
@@ -264,15 +279,15 @@ const AdminSubmissions = ({ onBack }) => {
       </Grid>
 
       {/* Submissions Table */}
-      <TableContainer component={Paper}>
-        <Table>
+      <TableContainer component={Paper} sx={{ overflowX: 'auto' }}>
+        <Table sx={{ minWidth: { xs: 650, sm: 'auto' } }}>
           <TableHead>
             <TableRow>
-              <TableCell>Artist</TableCell>
+              <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>Artist</TableCell>
               <TableCell>Title</TableCell>
-              <TableCell>Status</TableCell>
-              <TableCell>Submitted</TableCell>
-              <TableCell>Tracks</TableCell>
+              <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}>Status</TableCell>
+              <TableCell sx={{ display: { xs: 'none', lg: 'table-cell' } }}>Submitted</TableCell>
+              <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}>Tracks</TableCell>
               <TableCell>Actions</TableCell>
             </TableRow>
           </TableHead>
@@ -297,7 +312,7 @@ const AdminSubmissions = ({ onBack }) => {
             ) : (
               filteredSubmissions.map((submission) => (
                 <TableRow key={submission.id}>
-                  <TableCell>
+                  <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>
                     <Typography variant="body2" fontWeight="bold">
                       {submission.artistName || 'Unknown Artist'}
                     </Typography>
@@ -306,21 +321,31 @@ const AdminSubmissions = ({ onBack }) => {
                     </Typography>
                   </TableCell>
                   <TableCell>
-                    <Typography variant="body2" fontWeight="bold">
-                      {submission.title}
-                    </Typography>
-                    <Typography variant="caption" color="textSecondary">
-                      {submission.description}
-                    </Typography>
+                    <Box>
+                      <Typography variant="body2" fontWeight="bold">
+                        {submission.title}
+                      </Typography>
+                      <Typography variant="caption" color="textSecondary">
+                        {submission.description}
+                      </Typography>
+                      {/* Show status on mobile */}
+                      <Box sx={{ display: { xs: 'block', sm: 'none' }, mt: 1 }}>
+                        <Chip
+                          label={statusLabels[submission.status]}
+                          color={statusColors[submission.status]}
+                          size="small"
+                        />
+                      </Box>
+                    </Box>
                   </TableCell>
-                  <TableCell>
+                  <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}>
                     <Chip
                       label={statusLabels[submission.status]}
                       color={statusColors[submission.status]}
                       size="small"
                     />
                   </TableCell>
-                  <TableCell>
+                  <TableCell sx={{ display: { xs: 'none', lg: 'table-cell' } }}>
                     <Typography variant="body2">
                       {new Date(submission.createdAt).toLocaleDateString()}
                     </Typography>
@@ -328,7 +353,7 @@ const AdminSubmissions = ({ onBack }) => {
                       {new Date(submission.createdAt).toLocaleTimeString()}
                     </Typography>
                   </TableCell>
-                  <TableCell>
+                  <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}>
                     <Typography variant="body2">
                       {submission.tracks?.length || 0} tracks
                     </Typography>
@@ -356,16 +381,24 @@ const AdminSubmissions = ({ onBack }) => {
         onClose={() => setReviewDialog(false)}
         maxWidth="md"
         fullWidth
+        sx={{
+          '& .MuiDialog-paper': {
+            margin: { xs: 2, sm: 'auto' },
+            width: { xs: 'calc(100% - 32px)', sm: 'auto' }
+          }
+        }}
       >
-        <DialogTitle>
-          Review Submission: {selectedSubmission?.title}
+        <DialogTitle sx={{ pb: { xs: 1, sm: 2 } }}>
+          <Typography variant="h6" sx={{ fontSize: { xs: '1.1rem', sm: '1.25rem' } }}>
+            Review Submission: {selectedSubmission?.title}
+          </Typography>
         </DialogTitle>
-        <DialogContent>
+        <DialogContent sx={{ p: { xs: 2, sm: 3 } }}>
           {selectedSubmission && (
             <Box>
-              <Grid container spacing={3}>
+              <Grid container spacing={{ xs: 2, sm: 3 }}>
                 <Grid item xs={12} md={6}>
-                  <Typography variant="h6" gutterBottom>
+                  <Typography variant="h6" gutterBottom sx={{ fontSize: { xs: '1rem', sm: '1.25rem' } }}>
                     Submission Details
                   </Typography>
                   <Typography variant="body2" gutterBottom>
@@ -388,7 +421,7 @@ const AdminSubmissions = ({ onBack }) => {
                   </Typography>
                 </Grid>
                 <Grid item xs={12} md={6}>
-                  <Typography variant="h6" gutterBottom>
+                  <Typography variant="h6" gutterBottom sx={{ fontSize: { xs: '1rem', sm: '1.25rem' } }}>
                     Tracks ({selectedSubmission.tracks?.length || 0})
                   </Typography>
                   {selectedSubmission.tracks?.map((track, index) => {
@@ -404,7 +437,7 @@ const AdminSubmissions = ({ onBack }) => {
                           audioUrl={track.audioUrl}
                           title={track.title || `Track ${index + 1}`}
                           genre={track.genre}
-                          width={250}
+                          width={{ xs: 280, sm: 250 }}
                           height={50}
                           onDownload={() => window.open(track.audioUrl, '_blank')}
                         />

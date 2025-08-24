@@ -322,7 +322,7 @@ const SubmissionUploader = ({ onSubmissionCreated, onClose }) => {
   }
 
   return (
-    <Box>
+    <Box sx={{ p: { xs: 2, sm: 3 } }}>
       {/* User Info */}
       <Alert severity="info" sx={{ mb: 3 }}>
         <Typography variant="body2">
@@ -332,7 +332,7 @@ const SubmissionUploader = ({ onSubmissionCreated, onClose }) => {
       </Alert>
 
       {/* Submission Details */}
-      <Paper sx={{ p: 3, mb: 3 }}>
+      <Paper sx={{ p: { xs: 2, sm: 3 }, mb: 3 }}>
         <Typography variant="h6" gutterBottom>
           Submission Details
         </Typography>
@@ -361,7 +361,7 @@ const SubmissionUploader = ({ onSubmissionCreated, onClose }) => {
       </Paper>
 
       {/* File Upload Area */}
-      <Paper sx={{ p: 3, mb: 3 }}>
+      <Paper sx={{ p: { xs: 2, sm: 3 }, mb: 3 }}>
         <Typography variant="h6" gutterBottom>
           Upload Tracks
         </Typography>
@@ -371,7 +371,7 @@ const SubmissionUploader = ({ onSubmissionCreated, onClose }) => {
             border: '2px dashed',
             borderColor: isDragActive ? 'primary.main' : 'grey.300',
             borderRadius: 2,
-            p: 4,
+            p: { xs: 3, sm: 4 },
             textAlign: 'center',
             cursor: 'pointer',
             bgcolor: isDragActive ? 'action.hover' : 'background.paper',
@@ -381,8 +381,8 @@ const SubmissionUploader = ({ onSubmissionCreated, onClose }) => {
           }}
         >
           <input {...getInputProps()} />
-          <CloudUpload sx={{ fontSize: 48, color: 'text.secondary', mb: 2 }} />
-          <Typography variant="h6" gutterBottom>
+          <CloudUpload sx={{ fontSize: { xs: 40, sm: 48 }, color: 'text.secondary', mb: 2 }} />
+          <Typography variant="h6" gutterBottom sx={{ fontSize: { xs: '1.1rem', sm: '1.25rem' } }}>
             {isDragActive ? 'Drop files here...' : 'Drag & drop audio files here'}
           </Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
@@ -403,24 +403,33 @@ const SubmissionUploader = ({ onSubmissionCreated, onClose }) => {
 
       {/* Track List */}
       {tracks.length > 0 && (
-        <Paper sx={{ p: 3, mb: 3 }}>
+        <Paper sx={{ p: { xs: 2, sm: 3 }, mb: 3 }}>
           <Typography variant="h6" gutterBottom>
             Tracks ({tracks.length})
           </Typography>
           <List>
             {tracks.map((track, index) => (
               <React.Fragment key={track.id}>
-                <ListItem>
-                  <Box sx={{ flexGrow: 1 }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                      <MusicNote sx={{ mr: 1, color: 'text.secondary' }} />
-                      <Typography variant="subtitle1" sx={{ flexGrow: 1 }}>
-                        {track.filename}
-                      </Typography>
+                <ListItem sx={{ flexDirection: { xs: 'column', sm: 'row' }, alignItems: { xs: 'stretch', sm: 'flex-start' } }}>
+                  <Box sx={{ flexGrow: 1, width: '100%' }}>
+                    <Box sx={{ 
+                      display: 'flex', 
+                      flexDirection: { xs: 'column', sm: 'row' },
+                      alignItems: { xs: 'stretch', sm: 'center' }, 
+                      mb: 1,
+                      gap: { xs: 1, sm: 0 }
+                    }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', flexGrow: 1 }}>
+                        <MusicNote sx={{ mr: 1, color: 'text.secondary' }} />
+                        <Typography variant="subtitle1" sx={{ flexGrow: 1, wordBreak: 'break-word' }}>
+                          {track.filename}
+                        </Typography>
+                      </Box>
                       <IconButton 
                         size="small" 
                         onClick={() => removeTrack(track.id)}
                         disabled={track.status === 'uploading'}
+                        sx={{ alignSelf: { xs: 'flex-end', sm: 'center' } }}
                       >
                         <Delete />
                       </IconButton>
@@ -431,7 +440,7 @@ const SubmissionUploader = ({ onSubmissionCreated, onClose }) => {
                     </Typography>
 
                     {/* Inline Track Details Form */}
-                    <Box sx={{ mt: 2, p: 2, border: '1px solid #e0e0e0', borderRadius: 1, bgcolor: '#fafafa' }}>
+                    <Box sx={{ mt: 2, p: { xs: 1.5, sm: 2 }, border: '1px solid #e0e0e0', borderRadius: 1, bgcolor: '#fafafa' }}>
                       <Typography variant="subtitle2" gutterBottom>
                         Track Details
                       </Typography>
@@ -509,7 +518,7 @@ const SubmissionUploader = ({ onSubmissionCreated, onClose }) => {
                           audioUrl={track.audioUrl}
                           title={track.details.title || track.filename}
                           genre={track.details.genre}
-                          width={300}
+                          width={{ xs: 280, sm: 300 }}
                           height={50}
                         />
                       </Box>
