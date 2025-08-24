@@ -27,7 +27,6 @@ import {
 } from '@mui/material';
 import {
   ArrowBack,
-  Refresh,
   Search,
   Person,
   AdminPanelSettings,
@@ -163,17 +162,7 @@ import { collection, query, orderBy, onSnapshot, doc, updateDoc, where } from 'f
           </IconButton>
           <Typography variant="h4">User Management</Typography>
         </Box>
-        <Button
-          variant="outlined"
-          startIcon={<Refresh />}
-          onClick={() => {
-            console.log('🔄 Manual refresh requested');
-            setLoading(true);
-          }}
-          disabled={loading}
-        >
-          Refresh
-        </Button>
+
       </Box>
 
       {error && (

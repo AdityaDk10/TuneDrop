@@ -53,11 +53,7 @@ const ArtistDashboard = () => {
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
             TuneDrop Artist Portal
           </Typography>
-                     <Chip 
-             label={`${currentUser?.displayName} (Artist)`} 
-             color="secondary" 
-             sx={{ mr: 2 }} 
-           />
+
            <Button
              color="inherit"
              startIcon={<Edit />}

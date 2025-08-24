@@ -34,7 +34,6 @@ import {
   MusicNote,
   Download,
   Delete,
-  Refresh,
   FilterList,
   Star,
   Schedule,
@@ -194,14 +193,7 @@ const SubmissionHistory = () => {
         <Typography variant="h5" sx={{ textAlign: { xs: 'center', sm: 'left' } }}>
           My Submissions
         </Typography>
-        <Button
-          startIcon={<Refresh />}
-          onClick={() => setLoading(true)}
-          disabled={loading}
-          sx={{ width: { xs: '100%', sm: 'auto' } }}
-        >
-          Refresh
-        </Button>
+
       </Box>
 
       {/* Error Alert - Only show if there's an actual error and we're not just showing empty state */}

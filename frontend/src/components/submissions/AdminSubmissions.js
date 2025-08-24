@@ -32,7 +32,6 @@ import {
 } from '@mui/material';
 import {
   Visibility,
-  Refresh,
   PlayArrow,
   Download,
   Email,
@@ -204,18 +203,7 @@ const AdminSubmissions = ({ onBack }) => {
               <MenuItem value="rejected">Rejected</MenuItem>
             </Select>
           </FormControl>
-          <Button
-            variant="outlined"
-            startIcon={<Refresh />}
-            onClick={() => {
-              console.log('🔄 Manual refresh requested');
-              setLoading(true);
-            }}
-            disabled={loading}
-            sx={{ width: { xs: '100%', sm: 'auto' } }}
-          >
-            Refresh
-          </Button>
+
         </Box>
       </Box>
 

@@ -21,6 +21,11 @@ router.post('/register/artist', async (req, res) => {
       return res.status(400).json({ error: 'Missing required fields' });
     }
 
+    // Validate phone number format if provided
+    if (phoneNumber && !/^\+?[1-9]\d{1,14}$/.test(phoneNumber.replace(/\s/g, ''))) {
+      return res.status(400).json({ error: 'Invalid phone number format. Please include country code (e.g., +1234567890)' });
+    }
+
     // Create user in Firebase Auth
     const userRecord = await auth.createUser({
       email,

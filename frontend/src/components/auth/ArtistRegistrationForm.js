@@ -109,13 +109,20 @@ const ArtistRegistrationForm = () => {
         else if (formData.password !== formData.confirmPassword) newErrors.confirmPassword = 'Passwords do not match';
         
         if (!formData.displayName) newErrors.displayName = 'Display name is required';
-        if (!formData.phoneNumber) newErrors.phoneNumber = 'Phone number is required';
+        // Phone number is optional but if provided, validate format
+        if (formData.phoneNumber && !/^\+?[1-9]\d{1,14}$/.test(formData.phoneNumber.replace(/\s/g, ''))) {
+          newErrors.phoneNumber = 'Please enter a valid phone number with country code (e.g., +1234567890)';
+        }
         break;
         
       case 1: // Artist Information
         if (!formData.artistName) newErrors.artistName = 'Artist name is required';
         if (!formData.bio) newErrors.bio = 'Bio is required';
         else if (formData.bio.length < 10) newErrors.bio = 'Bio must be at least 10 characters';
+        break;
+        
+      case 2: // Social Media (Optional - no validation required)
+        // Social media is optional, so no validation needed
         break;
         
       default:
@@ -202,12 +209,13 @@ const ArtistRegistrationForm = () => {
             <Grid item xs={12} sm={6}>
               <TextField
                 fullWidth
-                label="Phone Number"
+                label="Phone Number (Optional)"
                 name="phoneNumber"
                 value={formData.phoneNumber}
                 onChange={handleChange}
                 error={!!errors.phoneNumber}
-                helperText={errors.phoneNumber}
+                helperText={errors.phoneNumber || "Include country code (e.g., +1234567890). 10-15 digits recommended."}
+                placeholder="+1234567890"
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">

@@ -71,11 +71,7 @@ const AdminDashboard = () => {
           >
             User Management
           </Button>
-          <Chip 
-            label={`${currentUser?.displayName} (Admin)`} 
-            color="secondary" 
-            sx={{ mr: 2 }} 
-          />
+
           <IconButton color="inherit" onClick={handleLogout}>
             <Logout />
           </IconButton>
