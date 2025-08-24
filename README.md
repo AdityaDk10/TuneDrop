@@ -301,9 +301,7 @@ firebase deploy --only hosting
 2. Set environment variables
 3. Deploy automatically on push
 
-## 📝 License
 
-This project is licensed under the MIT License.
 
 ---
 
