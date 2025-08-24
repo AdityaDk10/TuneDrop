@@ -45,6 +45,7 @@ import {
 import { useAuth } from '../../contexts/AuthContext';
 import { db } from '../../config/firebase';
 import { collection, query, where, orderBy, onSnapshot, doc, deleteDoc } from 'firebase/firestore';
+import AudioPlayer from '../common/AudioPlayer';
 
 const SubmissionHistory = () => {
   const { currentUser } = useAuth();
@@ -80,11 +81,6 @@ const SubmissionHistory = () => {
     // Filter by current user's submissions
     q = query(q, where('artistId', '==', currentUser.uid));
     
-    // Apply status filter if not 'all'
-    if (statusFilter !== 'all') {
-      q = query(q, where('status', '==', statusFilter));
-    }
-    
     // Order by creation date (newest first)
     q = query(q, orderBy('createdAt', 'desc'));
     
@@ -103,7 +99,14 @@ const SubmissionHistory = () => {
       setError(null);
     }, (error) => {
       console.error('❌ Firebase listener error:', error);
-      setError('Failed to load submissions');
+      // Only show error for actual connection issues, not for empty results
+      if (error.code === 'permission-denied' || error.code === 'unavailable') {
+        setError('Failed to load submissions');
+      } else {
+        // For other errors (like no submissions), just set empty array
+        setSubmissions([]);
+        setError(null);
+      }
       setLoading(false);
     });
     
@@ -112,7 +115,7 @@ const SubmissionHistory = () => {
       console.log('🧹 Cleaning up Firebase listener for artist submissions');
       unsubscribe();
     };
-  }, [currentUser, statusFilter]);
+  }, [currentUser]);
 
   // Delete submission
   const deleteSubmission = async (submissionId) => {
@@ -162,6 +165,13 @@ const SubmissionHistory = () => {
     ? submissions 
     : submissions.filter(s => s.status === statusFilter);
 
+  // Debug logging
+  console.log('🔍 Debug - Current status filter:', statusFilter);
+  console.log('🔍 Debug - Total submissions:', submissions.length);
+  console.log('🔍 Debug - All submission statuses:', submissions.map(s => ({ id: s.id, status: s.status, title: s.title })));
+  console.log('🔍 Debug - Filtered submissions:', filteredSubmissions.length);
+  console.log('🔍 Debug - Filtered submission statuses:', filteredSubmissions.map(s => ({ id: s.id, status: s.status, title: s.title })));
+
   if (loading) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
@@ -186,8 +196,8 @@ const SubmissionHistory = () => {
         </Button>
       </Box>
 
-      {/* Error Alert */}
-      {error && (
+      {/* Error Alert - Only show if there's an actual error and we're not just showing empty state */}
+      {error && !loading && (
         <Alert severity="error" sx={{ mb: 3 }} onClose={() => setError(null)}>
           {error}
         </Alert>
@@ -408,56 +418,39 @@ const SubmissionHistory = () => {
                       Tracks ({selectedSubmission.tracks?.length || 0})
                     </Typography>
                     {selectedSubmission.tracks?.length > 0 ? (
-                      <List>
-                        {selectedSubmission.tracks.map((track, index) => (
-                          <ListItem key={track.id} divider={index < selectedSubmission.tracks.length - 1}>
-                            <ListItemIcon>
-                              <MusicNote />
-                            </ListItemIcon>
-                            <ListItemText
-                              primary={track.title}
-                              secondary={
-                                <Box>
-                                  <Typography variant="body2" color="text.secondary">
-                                    {track.genre}
-                                    {track.bpm && ` • ${track.bpm} BPM`}
-                                    {track.key && ` • ${track.key}`}
-                                  </Typography>
-                                  {track.description && (
-                                    <Typography variant="body2" color="text.secondary">
-                                      {track.description}
-                                    </Typography>
-                                  )}
-                                </Box>
-                              }
-                            />
-                            <Box sx={{ display: 'flex', gap: 1, flexDirection: 'column' }}>
-                              {track.audioUrl && (
-                                <>
-                                  {/* Audio Player */}
-                                  <audio controls style={{ width: '100%', maxWidth: '300px' }}>
-                                    <source src={track.audioUrl} type={track.mimeType || 'audio/mpeg'} />
-                                    Your browser does not support the audio element.
-                                  </audio>
-                                  
-                                  {/* Download Link */}
-                                  <Tooltip title="Download">
-                                    <IconButton 
-                                      size="small"
-                                      href={track.audioUrl}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      download
-                                    >
-                                      <Download />
-                                    </IconButton>
-                                  </Tooltip>
-                                </>
+                      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                        {selectedSubmission.tracks.map((track, index) => {
+                          console.log('🎵 SubmissionHistory: Track data:', {
+                            index,
+                            id: track.id,
+                            title: track.title,
+                            audioUrl: track.audioUrl,
+                            genre: track.genre
+                          });
+                          return (
+                            <Box key={track.id}>
+                              <AudioPlayer
+                                audioUrl={track.audioUrl}
+                                title={track.title}
+                                genre={`${track.genre}${track.bpm ? ` • ${track.bpm} BPM` : ''}${track.key ? ` • ${track.key}` : ''}`}
+                                width={300}
+                                height={60}
+                                onDownload={() => {
+                                  const link = document.createElement('a');
+                                  link.href = track.audioUrl;
+                                  link.download = track.title || `track-${index + 1}`;
+                                  link.click();
+                                }}
+                              />
+                              {track.description && (
+                                <Typography variant="body2" color="text.secondary" sx={{ mt: 1, ml: 2 }}>
+                                  {track.description}
+                                </Typography>
                               )}
                             </Box>
-                          </ListItem>
-                        ))}
-                      </List>
+                          );
+                        })}
+                      </Box>
                     ) : (
                       <Typography variant="body2" color="text.secondary">
                         No tracks uploaded

@@ -35,11 +35,13 @@ import {
   Refresh,
   PlayArrow,
   Download,
-  Email
+  Email,
+  MusicNote
 } from '@mui/icons-material';
 import axios from 'axios';
 import { db } from '../../config/firebase';
 import { collection, query, where, orderBy, onSnapshot, doc, updateDoc } from 'firebase/firestore';
+import AudioPlayer from '../common/AudioPlayer';
 
 const AdminSubmissions = ({ onBack }) => {
   const [submissions, setSubmissions] = useState([]);
@@ -70,11 +72,6 @@ const AdminSubmissions = ({ onBack }) => {
     
     let q = collection(db, 'submissions');
     
-    // Apply status filter if not 'all'
-    if (statusFilter !== 'all') {
-      q = query(q, where('status', '==', statusFilter));
-    }
-    
     // Order by creation date (newest first)
     q = query(q, orderBy('createdAt', 'desc'));
     
@@ -93,7 +90,14 @@ const AdminSubmissions = ({ onBack }) => {
       setError(null);
     }, (error) => {
       console.error('❌ Firebase listener error:', error);
-      setError('Failed to load submissions');
+      // Only show error for actual connection issues, not for empty results
+      if (error.code === 'permission-denied' || error.code === 'unavailable') {
+        setError('Failed to load submissions');
+      } else {
+        // For other errors (like no submissions), just set empty array
+        setSubmissions([]);
+        setError(null);
+      }
       setLoading(false);
     });
     
@@ -102,7 +106,7 @@ const AdminSubmissions = ({ onBack }) => {
       console.log('🔄 Cleaning up Firebase listener');
       unsubscribe();
     };
-  }, [statusFilter]);
+  }, []);
 
 
 
@@ -125,7 +129,7 @@ const AdminSubmissions = ({ onBack }) => {
         reviewNotes,
         adminNotes,
         updatedAt: new Date(),
-        reviewedBy: localStorage.getItem('userId') || 'admin'
+        reviewedBy: 'admin' // Since this is admin-only component
       });
 
       console.log('✅ Submission status updated successfully');
@@ -145,6 +149,18 @@ const AdminSubmissions = ({ onBack }) => {
   };
 
 
+
+  // Filter submissions by status
+  const filteredSubmissions = statusFilter === 'all' 
+    ? submissions 
+    : submissions.filter(s => s.status === statusFilter);
+
+  // Debug logging
+  console.log('🔍 Admin Debug - Current status filter:', statusFilter);
+  console.log('🔍 Admin Debug - Total submissions:', submissions.length);
+  console.log('🔍 Admin Debug - All submission statuses:', submissions.map(s => ({ id: s.id, status: s.status, title: s.title, artist: s.artistName })));
+  console.log('🔍 Admin Debug - Filtered submissions:', filteredSubmissions.length);
+  console.log('🔍 Admin Debug - Filtered submission statuses:', filteredSubmissions.map(s => ({ id: s.id, status: s.status, title: s.title, artist: s.artistName })));
 
   if (loading) {
     return (
@@ -188,8 +204,9 @@ const AdminSubmissions = ({ onBack }) => {
         </Box>
       </Box>
 
-      {error && (
-        <Alert severity="error" sx={{ mb: 2 }}>
+      {/* Error Alert - Only show if there's an actual error and we're not just showing empty state */}
+      {error && !loading && (
+        <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError(null)}>
           {error}
         </Alert>
       )}
@@ -260,16 +277,25 @@ const AdminSubmissions = ({ onBack }) => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {submissions.length === 0 ? (
+            {filteredSubmissions.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} align="center">
-                  <Typography color="textSecondary">
-                    No submissions found
-                  </Typography>
+                <TableCell colSpan={6} align="center" sx={{ py: 4 }}>
+                  <Box sx={{ textAlign: 'center' }}>
+                    <MusicNote sx={{ fontSize: 48, color: 'text.secondary', mb: 2 }} />
+                    <Typography variant="h6" color="text.secondary" gutterBottom>
+                      No submissions found
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      {statusFilter === 'all' 
+                        ? "No submissions have been made yet." 
+                        : `No submissions with status "${statusFilter}".`
+                      }
+                    </Typography>
+                  </Box>
                 </TableCell>
               </TableRow>
             ) : (
-              submissions.map((submission) => (
+              filteredSubmissions.map((submission) => (
                 <TableRow key={submission.id}>
                   <TableCell>
                     <Typography variant="body2" fontWeight="bold">
@@ -365,24 +391,26 @@ const AdminSubmissions = ({ onBack }) => {
                   <Typography variant="h6" gutterBottom>
                     Tracks ({selectedSubmission.tracks?.length || 0})
                   </Typography>
-                  {selectedSubmission.tracks?.map((track, index) => (
-                    <Box key={index} sx={{ mb: 2, p: 2, border: '1px solid #ddd', borderRadius: 1 }}>
-                      <Typography variant="body2" fontWeight="bold">
-                        {track.title || `Track ${index + 1}`}
-                      </Typography>
-                      <Typography variant="caption" color="textSecondary">
-                        {track.genre} • {track.duration}
-                      </Typography>
-                      <Box display="flex" gap={1} mt={1}>
-                        <IconButton size="small" onClick={() => window.open(track.audioUrl, '_blank')}>
-                          <PlayArrow />
-                        </IconButton>
-                        <IconButton size="small" onClick={() => window.open(track.audioUrl, '_blank')}>
-                          <Download />
-                        </IconButton>
+                  {selectedSubmission.tracks?.map((track, index) => {
+                    console.log('🎵 AdminSubmissions: Track data:', {
+                      index,
+                      title: track.title,
+                      audioUrl: track.audioUrl,
+                      genre: track.genre
+                    });
+                    return (
+                      <Box key={index} sx={{ mb: 2 }}>
+                        <AudioPlayer
+                          audioUrl={track.audioUrl}
+                          title={track.title || `Track ${index + 1}`}
+                          genre={track.genre}
+                          width={250}
+                          height={50}
+                          onDownload={() => window.open(track.audioUrl, '_blank')}
+                        />
                       </Box>
-                    </Box>
-                  ))}
+                    );
+                  })}
                 </Grid>
               </Grid>
               

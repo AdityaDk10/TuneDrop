@@ -3,6 +3,7 @@ const multer = require('multer');
 const path = require('path');
 const { auth, db, storage, isInitialized } = require('../config/firebase');
 const { verifyToken, requireArtist, requireAdmin } = require('../middleware/auth');
+const emailService = require('../services/emailService');
 const router = express.Router();
 
 // Configure multer for memory storage (Firebase Storage)
@@ -261,6 +262,37 @@ router.post('/upload/:submissionId', verifyToken, requireArtist, upload.single('
 
     console.log('✅ Track upload completed successfully');
 
+    // Check if this was the last track and send confirmation email
+    const updatedSubmissionDoc = await submissionRef.get();
+    const finalSubmissionData = updatedSubmissionDoc.data();
+    
+    // Send confirmation email if submission has tracks
+    if (finalSubmissionData.tracks && finalSubmissionData.tracks.length > 0) {
+      try {
+        const emailResult = await emailService.sendSubmissionConfirmation(
+          finalSubmissionData.artistEmail,
+          finalSubmissionData.artistName,
+          submissionId,
+          finalSubmissionData.tracks
+        );
+        
+        if (emailResult.success) {
+          console.log('✅ Confirmation email sent successfully');
+          // Update submission with email sent status
+          await submissionRef.update({
+            confirmationEmailSent: true,
+            confirmationEmailSentAt: new Date(),
+            confirmationEmailMessageId: emailResult.messageId,
+            emailMethod: emailResult.method
+          });
+        } else {
+          console.error('❌ Failed to send confirmation email:', emailResult.error);
+        }
+      } catch (emailError) {
+        console.error('❌ Error sending confirmation email:', emailError);
+      }
+    }
+
     res.json({
       message: 'Track uploaded successfully',
       track: trackData,
@@ -279,8 +311,6 @@ router.post('/upload/:submissionId', verifyToken, requireArtist, upload.single('
     });
   }
 });
-
-
 
 // Get artist's submissions
 router.get('/my-submissions', verifyToken, requireArtist, async (req, res) => {

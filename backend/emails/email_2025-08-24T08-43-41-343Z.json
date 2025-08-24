@@ -1,0 +1,8 @@
+{
+  "from": "submissions@tunedrop.com",
+  "to": "aditya.dabbirukashyap@gmail.com",
+  "subject": "TuneDrop Email Service Test",
+  "html": "<h1>Email service is working!</h1><p>This is a test email from TuneDrop.</p>",
+  "timestamp": "2025-08-24T08:43:41.326Z",
+  "type": "test"
+}

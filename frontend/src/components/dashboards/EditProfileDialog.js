@@ -392,3 +392,4 @@ const EditProfileDialog = ({ open, onClose, onProfileUpdated }) => {
 };
 
 export default EditProfileDialog;
+

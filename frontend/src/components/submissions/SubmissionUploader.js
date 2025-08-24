@@ -12,10 +12,7 @@ import {
   Alert,
   Chip,
   IconButton,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
+
   List,
   ListItem,
   ListItemText,
@@ -39,6 +36,7 @@ import { useDropzone } from 'react-dropzone';
 import axios from 'axios';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import AudioPlayer from '../common/AudioPlayer';
 
 const SubmissionUploader = ({ onSubmissionCreated, onClose }) => {
   const { currentUser } = useAuth();
@@ -54,7 +52,7 @@ const SubmissionUploader = ({ onSubmissionCreated, onClose }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
-  const [trackDetailsDialog, setTrackDetailsDialog] = useState(null);
+
   
   const genres = [
     'Electronic', 'Hip-Hop', 'Rock', 'Pop', 'R&B', 'Jazz', 'Classical', 
@@ -267,10 +265,7 @@ const SubmissionUploader = ({ onSubmissionCreated, onClose }) => {
     ));
   };
 
-  // Open track details dialog
-  const openTrackDetails = (track) => {
-    setTrackDetailsDialog(track);
-  };
+
 
   // Format file size
   const formatFileSize = (bytes) => {
@@ -422,12 +417,6 @@ const SubmissionUploader = ({ onSubmissionCreated, onClose }) => {
                       <Typography variant="subtitle1" sx={{ flexGrow: 1 }}>
                         {track.filename}
                       </Typography>
-                      <Chip 
-                        label={track.status} 
-                        color={getStatusColor(track.status)}
-                        size="small"
-                        sx={{ mr: 1 }}
-                      />
                       <IconButton 
                         size="small" 
                         onClick={() => removeTrack(track.id)}
@@ -437,18 +426,100 @@ const SubmissionUploader = ({ onSubmissionCreated, onClose }) => {
                       </IconButton>
                     </Box>
                     
-                    <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                    <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
                       {formatFileSize(track.size)}
-                      {track.details.title && ` • ${track.details.title}`}
-                      {track.details.genre && ` • ${track.details.genre}`}
-                      {track.details.bpm && ` • ${track.details.bpm} BPM`}
                     </Typography>
+
+                    {/* Inline Track Details Form */}
+                    <Box sx={{ mt: 2, p: 2, border: '1px solid #e0e0e0', borderRadius: 1, bgcolor: '#fafafa' }}>
+                      <Typography variant="subtitle2" gutterBottom>
+                        Track Details
+                      </Typography>
+                      <Grid container spacing={2}>
+                        <Grid item xs={12}>
+                          <TextField
+                            fullWidth
+                            size="small"
+                            label="Track Title *"
+                            value={track.details.title || ''}
+                            onChange={(e) => updateTrackDetails(track.id, { title: e.target.value })}
+                            required
+                            placeholder="Enter track title"
+                          />
+                        </Grid>
+                        <Grid item xs={12} sm={6}>
+                          <FormControl fullWidth size="small" required>
+                            <InputLabel>Genre *</InputLabel>
+                            <Select
+                              value={track.details.genre || ''}
+                              label="Genre *"
+                              onChange={(e) => updateTrackDetails(track.id, { genre: e.target.value })}
+                            >
+                              {genres.map(genre => (
+                                <MenuItem key={genre} value={genre}>{genre}</MenuItem>
+                              ))}
+                            </Select>
+                          </FormControl>
+                        </Grid>
+                        <Grid item xs={12} sm={6}>
+                          <TextField
+                            fullWidth
+                            size="small"
+                            label="BPM (Optional)"
+                            type="number"
+                            value={track.details.bpm || ''}
+                            onChange={(e) => updateTrackDetails(track.id, { bpm: e.target.value })}
+                            placeholder="e.g., 120"
+                          />
+                        </Grid>
+                        <Grid item xs={12} sm={6}>
+                          <FormControl fullWidth size="small">
+                            <InputLabel>Key (Optional)</InputLabel>
+                            <Select
+                              value={track.details.key || ''}
+                              label="Key (Optional)"
+                              onChange={(e) => updateTrackDetails(track.id, { key: e.target.value })}
+                            >
+                              {keys.map(key => (
+                                <MenuItem key={key} value={key}>{key}</MenuItem>
+                              ))}
+                            </Select>
+                          </FormControl>
+                        </Grid>
+                        <Grid item xs={12} sm={6}>
+                          <TextField
+                            fullWidth
+                            size="small"
+                            label="Description (Optional)"
+                            value={track.details.description || ''}
+                            onChange={(e) => updateTrackDetails(track.id, { description: e.target.value })}
+                            placeholder="Brief description"
+                          />
+                        </Grid>
+                      </Grid>
+                    </Box>
+
+                    {/* Audio Preview */}
+                    {track.status === 'uploaded' && track.audioUrl && (
+                      <Box sx={{ mt: 2 }}>
+                        <Typography variant="subtitle2" gutterBottom>
+                          Audio Preview
+                        </Typography>
+                        <AudioPlayer
+                          audioUrl={track.audioUrl}
+                          title={track.details.title || track.filename}
+                          genre={track.details.genre}
+                          width={300}
+                          height={50}
+                        />
+                      </Box>
+                    )}
 
                     {track.status === 'uploading' && (
                       <LinearProgress 
                         variant="determinate" 
                         value={uploadProgress[track.id] || 0}
-                        sx={{ mb: 1 }}
+                        sx={{ mb: 1, mt: 2 }}
                       />
                     )}
 
@@ -457,14 +528,6 @@ const SubmissionUploader = ({ onSubmissionCreated, onClose }) => {
                         {track.error}
                       </Alert>
                     )}
-
-                    <Button
-                      size="small"
-                      onClick={() => openTrackDetails(track)}
-                      disabled={track.status === 'uploading'}
-                    >
-                      {track.details.title && track.details.genre ? 'Edit Details' : 'Add Details'}
-                    </Button>
                   </Box>
                 </ListItem>
                 {index < tracks.length - 1 && <Divider />}
@@ -487,83 +550,7 @@ const SubmissionUploader = ({ onSubmissionCreated, onClose }) => {
         </Button>
       </Box>
 
-      {/* Track Details Dialog */}
-      <Dialog 
-        open={!!trackDetailsDialog} 
-        onClose={() => setTrackDetailsDialog(null)}
-        maxWidth="sm"
-        fullWidth
-      >
-        <DialogTitle>
-          Track Details: {trackDetailsDialog?.filename}
-        </DialogTitle>
-        <DialogContent>
-          <Grid container spacing={2} sx={{ mt: 1 }}>
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                label="Track Title"
-                value={trackDetailsDialog?.details.title || ''}
-                onChange={(e) => updateTrackDetails(trackDetailsDialog?.id, { title: e.target.value })}
-                required
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <FormControl fullWidth required>
-                <InputLabel>Genre</InputLabel>
-                <Select
-                  value={trackDetailsDialog?.details.genre || ''}
-                  label="Genre"
-                  onChange={(e) => updateTrackDetails(trackDetailsDialog?.id, { genre: e.target.value })}
-                >
-                  {genres.map(genre => (
-                    <MenuItem key={genre} value={genre}>{genre}</MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                label="BPM (Optional)"
-                type="number"
-                value={trackDetailsDialog?.details.bpm || ''}
-                onChange={(e) => updateTrackDetails(trackDetailsDialog?.id, { bpm: e.target.value })}
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <FormControl fullWidth>
-                <InputLabel>Key (Optional)</InputLabel>
-                <Select
-                  value={trackDetailsDialog?.details.key || ''}
-                  label="Key (Optional)"
-                  onChange={(e) => updateTrackDetails(trackDetailsDialog?.id, { key: e.target.value })}
-                >
-                  {keys.map(key => (
-                    <MenuItem key={key} value={key}>{key}</MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                label="Description (Optional)"
-                multiline
-                rows={3}
-                value={trackDetailsDialog?.details.description || ''}
-                onChange={(e) => updateTrackDetails(trackDetailsDialog?.id, { description: e.target.value })}
-                placeholder="Describe this track..."
-              />
-            </Grid>
-          </Grid>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setTrackDetailsDialog(null)}>
-            Done
-          </Button>
-        </DialogActions>
-      </Dialog>
+
     </Box>
   );
 };
