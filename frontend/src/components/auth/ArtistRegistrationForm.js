@@ -64,6 +64,7 @@ const ArtistRegistrationForm = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
+  const [success, setSuccess] = useState('');
   
   const { registerArtist, error, setError } = useAuth();
   const navigate = useNavigate();
@@ -155,9 +156,15 @@ const ArtistRegistrationForm = () => {
     try {
       const result = await registerArtist(formData);
       
-      // Navigate to artist dashboard after successful registration
+      // Show success message and redirect to login
       if (result && result.user) {
-        navigate('/artist');
+        // Show success message
+        setSuccess('Account created successfully! Please login with your credentials.');
+        
+        // Redirect to login page after a short delay
+        setTimeout(() => {
+          navigate('/login');
+        }, 2000);
       }
     } catch (error) {
       console.error('Registration error:', error);
@@ -481,6 +488,13 @@ const ArtistRegistrationForm = () => {
         {error && (
           <Alert severity="error" sx={{ mb: 3 }}>
             {error}
+          </Alert>
+        )}
+
+        {/* Success Alert */}
+        {success && (
+          <Alert severity="success" sx={{ mb: 3 }}>
+            {success}
           </Alert>
         )}
 

@@ -24,8 +24,7 @@ import {
   Save
 } from '@mui/icons-material';
 import { useAuth } from '../../contexts/AuthContext';
-import { doc, updateDoc, getDoc } from 'firebase/firestore';
-import { db } from '../../config/firebase';
+import axios from 'axios';
 
 const EditProfileDialog = ({ open, onClose, onProfileUpdated }) => {
   const { currentUser } = useAuth();
@@ -50,31 +49,20 @@ const EditProfileDialog = ({ open, onClose, onProfileUpdated }) => {
   // Load current user data when dialog opens
   useEffect(() => {
     if (open && currentUser) {
-      const loadUserData = async () => {
-        try {
-          const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
-          if (userDoc.exists()) {
-            const userData = userDoc.data();
-            setFormData({
-              displayName: userData.displayName || '',
-              artistName: userData.artistName || '',
-              bio: userData.bio || '',
-              socialMedia: {
-                instagram: userData.socialMedia?.instagram || '',
-                soundcloud: userData.socialMedia?.soundcloud || '',
-                spotify: userData.socialMedia?.spotify || '',
-                youtube: userData.socialMedia?.youtube || '',
-                facebook: userData.socialMedia?.facebook || '',
-                twitter: userData.socialMedia?.twitter || ''
-              }
-            });
-          }
-        } catch (error) {
-          console.error('Error loading user data:', error);
-          setError('Failed to load profile data');
+      // Use current user data from context instead of fetching from Firestore
+      setFormData({
+        displayName: currentUser.displayName || '',
+        artistName: currentUser.artistName || '',
+        bio: currentUser.bio || '',
+        socialMedia: {
+          instagram: currentUser.socialMedia?.instagram || '',
+          soundcloud: currentUser.socialMedia?.soundcloud || '',
+          spotify: currentUser.socialMedia?.spotify || '',
+          youtube: currentUser.socialMedia?.youtube || '',
+          facebook: currentUser.socialMedia?.facebook || '',
+          twitter: currentUser.socialMedia?.twitter || ''
         }
-      };
-      loadUserData();
+      });
     }
   }, [open, currentUser]);
 
@@ -128,14 +116,11 @@ const EditProfileDialog = ({ open, onClose, onProfileUpdated }) => {
         return;
       }
 
-      // Update user document in Firestore
-      const userRef = doc(db, 'users', currentUser.uid);
-      await updateDoc(userRef, {
+      // Update profile through backend API
+      const response = await axios.put('/api/auth/profile', {
         displayName: formData.displayName.trim(),
-        artistName: formData.artistName.trim(),
         bio: formData.bio.trim(),
-        socialMedia: formData.socialMedia,
-        updatedAt: new Date()
+        socialMedia: formData.socialMedia
       });
 
       setSuccess('Profile updated successfully!');

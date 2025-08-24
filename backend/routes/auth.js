@@ -476,7 +476,10 @@ router.put('/profile', verifyToken, async (req, res) => {
       if (socialMedia) updateData.socialMedia = socialMedia;
     }
 
-    await db.collection('users').doc(req.user.uid).update(updateData);
+    await db.collection('users').doc(req.user.uid).update({
+      ...updateData,
+      updatedAt: new Date()
+    });
 
     res.json({ message: 'Profile updated successfully' });
 

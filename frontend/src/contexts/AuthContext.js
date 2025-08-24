@@ -54,11 +54,7 @@ export const AuthProvider = ({ children }) => {
         socialMedia
       });
 
-      // After successful registration, auto-login the user
-      if (response.data.user) {
-        await loginWithBackend(email, password);
-      }
-
+      // Don't auto-login - let user complete the form and login manually
       return response.data;
     } catch (error) {
       setError(error.response?.data?.error || error.message);
